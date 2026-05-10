@@ -1,0 +1,47 @@
+# Node
+node_modules/
+client/node_modules/
+server/node_modules/
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+client/.env
+server/.env
+
+# Database
+server/data/app.db
+server/data/app.db-shm
+server/data/app.db-wal
+server/data/*.db
+server/data/*.db-shm
+server/data/*.db-wal
+
+# Python / ML
+__pycache__/
+*.pyc
+.venv/
+venv/
+server/ml/**/__pycache__/
+
+# Generated backend files
+server/data/uploads/*
+server/data/temp/*
+server/data/reports/*
+
+# Keep empty backend folders
+!server/data/uploads/.gitkeep
+!server/data/temp/.gitkeep
+!server/data/reports/.gitkeep
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db

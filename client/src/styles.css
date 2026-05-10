@@ -1,0 +1,24 @@
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  background:
+    radial-gradient(circle at top left, rgba(56, 189, 248, 0.24), transparent 32rem),
+    radial-gradient(circle at top right, rgba(14, 165, 233, 0.18), transparent 28rem),
+    #f4fbff;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.MuiMenuItem-root {
+  gap: 10px;
+}

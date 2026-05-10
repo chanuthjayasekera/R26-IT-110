@@ -1,0 +1,75 @@
+.rehab-page {
+  padding-top: 28px;
+  padding-bottom: 58px;
+}
+
+.rehab-hero {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  align-items: center;
+  gap: 26px;
+  border-radius: 34px;
+  padding: 38px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(224, 242, 254, 0.86)),
+    radial-gradient(circle at bottom right, rgba(34, 197, 94, 0.18), transparent 28rem);
+  border: 1px solid rgba(14, 165, 233, 0.18);
+  box-shadow: 0 24px 70px rgba(2, 132, 199, 0.12);
+}
+
+.rehab-visual-card {
+  min-height: 230px;
+  border-radius: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: linear-gradient(135deg, #dcfce7, #e0f2fe);
+  color: #075985;
+}
+
+.rehab-visual-card svg {
+  font-size: 84px;
+}
+
+.rehab-card {
+  height: 100%;
+  border: 1px solid rgba(14, 165, 233, 0.16);
+}
+
+.rehab-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.rehab-feedback-box {
+  border-radius: 26px;
+  padding: 30px;
+  border: 2px dashed rgba(2, 132, 199, 0.34);
+  background: rgba(224, 242, 254, 0.5);
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .rehab-hero {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .rehab-page {
+    padding-top: 34px;
+    padding-bottom: 34px;
+  }
+
+  .rehab-hero {
+    padding: 26px;
+  }
+}

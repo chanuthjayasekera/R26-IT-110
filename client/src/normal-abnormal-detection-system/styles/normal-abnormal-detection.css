@@ -1,0 +1,64 @@
+.normal-detection-page {
+  padding-top: 28px;
+  padding-bottom: 58px;
+}
+
+.normal-detection-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 34px;
+  padding: 38px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(224, 242, 254, 0.86)),
+    radial-gradient(circle at top right, rgba(14, 165, 233, 0.28), transparent 28rem);
+  border: 1px solid rgba(14, 165, 233, 0.18);
+  box-shadow: 0 24px 70px rgba(2, 132, 199, 0.12);
+}
+
+.normal-detection-badge {
+  position: absolute;
+  right: 32px;
+  bottom: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 22px;
+  padding: 16px 18px;
+  background: rgba(255, 255, 255, 0.86);
+  color: #075985;
+  box-shadow: 0 20px 44px rgba(15, 23, 42, 0.14);
+}
+
+.normal-step-card,
+.normal-info-card {
+  height: 100%;
+  border: 1px solid rgba(14, 165, 233, 0.16);
+}
+
+.normal-step-number {
+  width: 48px;
+  height: 48px;
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0284c7, #38bdf8);
+  color: white;
+  font-weight: 900;
+}
+
+@media (max-width: 700px) {
+  .normal-detection-page {
+    padding-top: 34px;
+    padding-bottom: 34px;
+  }
+
+  .normal-detection-hero {
+    padding: 26px;
+  }
+
+  .normal-detection-badge {
+    position: static;
+    margin-top: 22px;
+  }
+}
