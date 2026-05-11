@@ -15,6 +15,7 @@ export default function NormalAbnormalDetection() {
     ["04", "Severity preview", "Store confidence, abnormal ratio, and screening summary."]
   ];
 
+
   return (
     <Container maxWidth="xl" className="normal-detection-page">
       <Stack spacing={4}>
@@ -73,3 +74,4 @@ export default function NormalAbnormalDetection() {
     </Container>
   );
 }
+//*n
