@@ -74,4 +74,4 @@ export default function NormalAbnormalDetection() {
     </Container>
   );
 }
-//*norm
+//*normal
