@@ -9,6 +9,7 @@ import TipsAndUpdatesIcon from "@mui/icons-material/TipsAndUpdates";
 import "../styles/rehab-exercise-detection.css";
 
 export default function RehabExerciseDetection() {
+  // Feature cards displayed in the dashboard
   const cards = [
     ["Exercise upload", "Upload rehabilitation exercise videos for pose correctness detection."],
     ["Correctness check", "Prepared for trained rehab model feedback on exercise form."],
@@ -23,6 +24,8 @@ export default function RehabExerciseDetection() {
           <Stack spacing={2}>
             <Typography variant="overline" fontWeight={900} color="primary">Component 4</Typography>
             <Typography variant="h3" fontWeight={900}>Rehab Exercise Detection</Typography>
+
+            {/* Short system description */}
             <Typography color="text.secondary" maxWidth="860px">
               Rehabilitation workspace for exercise video upload, pose correctness detection, repetition quality monitoring, improvement tracking, and recommendation retrieval.
             </Typography>
@@ -41,6 +44,8 @@ export default function RehabExerciseDetection() {
         <Grid2 container spacing={3}>
           {cards.map(([title, description], index) => (
             <Grid2 key={title} size={{ xs: 12, md: 6, lg: 3 }}>
+
+              {/* Individual feature card */}
               <Card className="rehab-card">
                 <CardContent>
                   <Stack spacing={2}>
@@ -50,7 +55,10 @@ export default function RehabExerciseDetection() {
                       {index === 2 && <RepeatIcon />}
                       {index === 3 && <TipsAndUpdatesIcon />}
                     </Box>
+
+                    {/* Feature title */}
                     <Typography variant="h6">{title}</Typography>
+                    {/* Feature description */}
                     <Typography color="text.secondary">{description}</Typography>
                   </Stack>
                 </CardContent>
