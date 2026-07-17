@@ -1,73 +1,370 @@
-.pd-page {
-  padding-top: 28px;
-  padding-bottom: 58px;
+.component3-page {
+  --component3-teal: #0891b2;
+  --component3-green: #16a34a;
+  --component3-amber: #d97706;
 }
 
-.pd-hero {
-  display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  align-items: center;
-  gap: 26px;
-  border-radius: 34px;
-  padding: 38px;
+.component3-hero {
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(224, 242, 254, 0.86)),
-    radial-gradient(circle at top right, rgba(59, 130, 246, 0.22), transparent 28rem);
-  border: 1px solid rgba(14, 165, 233, 0.18);
-  box-shadow: 0 24px 70px rgba(2, 132, 199, 0.12);
+    linear-gradient(135deg, rgba(255, 255, 255, 0.99), rgba(240, 249, 255, 0.95)),
+    linear-gradient(90deg, rgba(8, 145, 178, 0.14), rgba(22, 163, 74, 0.1), rgba(217, 119, 6, 0.08));
 }
 
-.pd-brain-panel {
-  min-height: 230px;
-  border-radius: 28px;
+.component3-screening-card {
+  min-height: 620px;
+}
+
+.component3-upload-zone {
+  min-height: 470px;
+}
+
+.component3-inline-video {
+  max-height: 500px;
+}
+
+.component3-chart-bars {
+  display: grid;
+  gap: 18px;
+  padding: 8px 0;
+}
+
+.component3-chart-row {
+  display: grid;
+  grid-template-columns: minmax(170px, 0.35fr) 1fr auto;
+  gap: 14px;
+  align-items: center;
+}
+
+.component3-chart-track {
+  height: 26px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #e2e8f0;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.component3-chart-bar {
+  height: 100%;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #0284c7, #0891b2);
+  transition: width 0.25s ease;
+}
+
+.component3-chart-bar.normal {
+  background: linear-gradient(90deg, #0284c7, #38bdf8);
+}
+
+.component3-chart-bar.detected {
+  background: linear-gradient(90deg, #dc2626, #f87171);
+}
+
+.component3-chart-bar.neuropathy {
+  background: linear-gradient(90deg, #d97706, #fbbf24);
+}
+
+.component3-chart-bar.secondary {
+  background: linear-gradient(90deg, #16a34a, #65a30d);
+}
+
+.component3-metric-chart {
+  display: grid;
+  gap: 14px;
+}
+
+.component3-vertical-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.component3-vertical-card {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  min-height: 360px;
+  padding: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.component3-vertical-plot {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 12px;
+  align-items: stretch;
+  min-height: 210px;
+}
+
+.component3-vertical-axis {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 6px 0 42px;
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.component3-vertical-bars {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
-  background: linear-gradient(135deg, #dbeafe, #e0f2fe);
-  color: #075985;
+  align-items: end;
 }
 
-.pd-brain-panel svg {
-  font-size: 86px;
+.component3-vertical-bar-group {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: 1fr auto auto;
+  gap: 6px;
+  align-items: end;
+  justify-items: center;
+  color: #0f172a;
 }
 
-.pd-card,
-.pd-profile-card {
-  height: 100%;
-  border: 1px solid rgba(14, 165, 233, 0.16);
-}
-
-.pd-index {
-  width: 46px;
-  height: 46px;
-  border-radius: 16px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #0284c7, #60a5fa);
-  color: white;
+.component3-vertical-bar-group span {
+  max-width: 100%;
+  min-height: 34px;
+  color: #64748b;
+  font-size: 0.76rem;
   font-weight: 900;
+  line-height: 1.1;
+  text-align: center;
+  overflow-wrap: anywhere;
 }
 
-.pd-profile-card {
-  background: rgba(255, 255, 255, 0.78);
+.component3-vertical-bar-group strong {
+  font-size: 0.88rem;
+  line-height: 1.1;
+}
+
+.component3-vertical-bar-shell {
+  position: relative;
+  width: min(58px, 80%);
+  height: 170px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  border-radius: 8px 8px 4px 4px;
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.06) 1px, transparent 1px) 0 0 / 100% 25%,
+    #eef2f7;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+}
+
+.component3-vertical-bar {
+  width: 100%;
+  min-height: 4%;
+  border-radius: 8px 8px 4px 4px;
+  transition: height 0.25s ease;
+}
+
+.component3-vertical-bar.normal {
+  background: linear-gradient(180deg, #38bdf8, #0284c7);
+}
+
+.component3-vertical-bar.detected {
+  background: linear-gradient(180deg, #f87171, #dc2626);
+}
+
+.component3-vertical-bar.neuropathy {
+  background: linear-gradient(180deg, #fbbf24, #d97706);
+}
+
+.component3-range-note {
+  min-height: 42px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 0.82rem !important;
+  line-height: 1.35 !important;
+}
+
+.component3-hover-tip {
+  position: relative;
+}
+
+.component3-hover-tip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: calc(100% + 8px);
+  z-index: 10;
+  display: none;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #ffffff;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  white-space: pre-line;
+}
+
+.component3-hover-tip:hover::after,
+.component3-hover-tip:focus-within::after {
+  display: block;
+}
+
+.component3-vertical-card.component3-hover-tip::after {
+  top: auto;
+  bottom: 72px;
+  max-height: 150px;
+  overflow: auto;
+}
+
+.component3-metric-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.32fr) 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.component3-chart-unit {
+  color: #64748b;
+  font-size: 0.82rem !important;
+}
+
+.component3-dual-bars {
+  display: grid;
+  gap: 8px;
+}
+
+.component3-bar-line {
+  display: grid;
+  grid-template-columns: 96px 1fr 76px;
+  gap: 10px;
+  align-items: center;
+}
+
+.component3-bar-line span {
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.component3-bar-line strong {
+  text-align: right;
+  color: #0f172a;
+}
+
+.component3-probability-compare {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.component3-score-card {
+  min-height: 170px;
+  display: grid;
+  align-content: center;
+  gap: 12px;
+  padding: 22px;
+  border-radius: 8px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: #ffffff;
+}
+
+.component3-score-card.pd {
+  border-left: 6px solid #dc2626;
+}
+
+.component3-score-card.neuro {
+  border-left: 6px solid #d97706;
+}
+
+.component3-probability-vertical {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 18px;
+  align-items: center;
+}
+
+.component3-probability-vertical .component3-vertical-bar-shell {
+  width: 70px;
+  height: 190px;
+}
+
+.component3-overlap-list {
+  display: grid;
+  gap: 10px;
+}
+
+.component3-overlap-row {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.7fr) repeat(2, minmax(220px, 1fr));
+  gap: 12px;
+  align-items: stretch;
+  padding: 12px 14px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.component3-range-column {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border-left: 4px solid #dc2626;
+}
+
+.component3-range-column.neuro {
+  border-left-color: #d97706;
+}
+
+.component3-range-column p,
+.component3-range-column span {
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 900px) {
-  .pd-hero {
+  .component3-chart-row {
+    grid-template-columns: 1fr auto;
+  }
+
+  .component3-metric-row,
+  .component3-probability-compare,
+  .component3-overlap-row {
     grid-template-columns: 1fr;
+  }
+
+  .component3-vertical-card {
+    min-height: auto;
+  }
+
+  .component3-bar-line {
+    grid-template-columns: 82px 1fr 64px;
+  }
+
+  .component3-chart-track {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .component3-bar-line .component3-chart-track,
+  .component3-score-card .component3-chart-track {
+    grid-column: auto;
+    grid-row: auto;
   }
 }
 
 @media (max-width: 560px) {
-  .pd-page {
-    padding-top: 34px;
-    padding-bottom: 34px;
+  .component3-screening-card {
+    min-height: auto;
   }
 
-  .pd-hero {
-    padding: 26px;
+  .component3-upload-zone {
+    min-height: 330px;
   }
 }
