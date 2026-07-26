@@ -25,11 +25,19 @@ __pycache__/
 .venv/
 venv/
 server/ml/**/__pycache__/
+server/ml/**/01_input_videos/*
+server/ml/**/01_videos_to_extract/*
+server/ml/**/02_extracted_csv/*
+server/ml/**/03_metadata/*
+server/ml/**/05_outputs/*
+server/ml/**/07_reports/*
+!server/ml/**/.gitkeep
 
 # Generated backend files
 server/data/uploads/*
 server/data/temp/*
 server/data/reports/*
+server/data/component1-runs/*
 
 # Keep empty backend folders
 !server/data/uploads/.gitkeep
@@ -45,3 +53,4 @@ yarn-error.log*
 # OS files
 .DS_Store
 Thumbs.db
+.codex_tmp/

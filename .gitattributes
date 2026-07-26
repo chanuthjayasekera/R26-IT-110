@@ -1,0 +1,2 @@
+server/ml/**/*.joblib filter=lfs diff=lfs merge=lfs -text
+server/ml/**/*.task filter=lfs diff=lfs merge=lfs -text
