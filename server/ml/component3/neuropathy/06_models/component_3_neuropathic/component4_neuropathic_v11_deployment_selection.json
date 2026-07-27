@@ -1,0 +1,36 @@
+{
+  "component": "Component 4",
+  "detector": "Standalone neuropathic gait screening model",
+  "selected_version": "Neuropathic V10 normal-inclusive Rasika hard-positive",
+  "selected_model_path": "06_models/component_4_neuropathic/component4_neuropathic_v10_normal_rasika_model.joblib",
+  "selected_feature_list_path": "06_models/component_4_neuropathic/component4_neuropathic_v10_normal_rasika_feature_list.json",
+  "selected_settings_path": "06_models/component_4_neuropathic/component4_neuropathic_v10_normal_rasika_settings.json",
+  "model_sha256": "882428428d3cbd87af3bbfe51f8c9800ff383cc693ebc854b5acd6255361c72a",
+  "normal_class_included_as_negative": true,
+  "selected_model": "neuro_v10_gait_biomech_normal_guard",
+  "decision_rule": {
+    "mean_threshold": 0.44,
+    "window_threshold": 0.24,
+    "ratio_threshold": 0.1,
+    "count_threshold": 1,
+    "max_threshold": 0.3,
+    "min_total_windows": 5
+  },
+  "held_out_test_metrics": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "tn": 159,
+    "fp": 0,
+    "fn": 0,
+    "tp": 20
+  },
+  "held_out_normal_result": {
+    "normal_videos": 32,
+    "false_positive_as_neuropathic": 0
+  },
+  "rollback_version": "Neuropathic V5 pattern aggregation",
+  "rollback_model_path": "06_models/component_4_neuropathic/component4_neuropathic_v5_pattern_model.joblib",
+  "clinical_note": "Screening support only; not a medical diagnosis."
+}
