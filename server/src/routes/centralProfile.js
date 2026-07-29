@@ -52,3 +52,48 @@ function orderedFlags(rows) {
     .map(publicFlag)
     .sort((a, b) => sourceOrder.indexOf(a.sourceType) - sourceOrder.indexOf(b.sourceType));
 }
+
+centralProfileRouter.get("/patient", requireAuth, requireRole("patient"), (req, res) => {
+  const rows = db.prepare(`
+    SELECT *
+    FROM central_profile_flags
+    WHERE user_id = ?
+    ORDER BY updated_at DESC
+  `).all(req.user.id);
+
+  res.json({ flags: orderedFlags(rows) });
+});
+
+centralProfileRouter.post("/patient/flags", requireAuth, requireRole("patient"), (req, res) => {
+  const sourceType = String(req.body.sourceType || "").trim();
+  const screeningId = String(req.body.screeningId || "").trim();
+  const snapshot = req.body.snapshot && typeof req.body.snapshot === "object" ? req.body.snapshot : {};
+
+  if (!sourceLabels[sourceType] || !screeningId) {
+    return res.status(422).json({ message: "Choose a valid screening result for the centralized profile." });
+  }
+
+  const now = new Date().toISOString();
+  const existing = db.prepare(`
+    SELECT id
+    FROM central_profile_flags
+    WHERE user_id = ? AND source_type = ?
+  `).get(req.user.id, sourceType);
+
+  if (existing) {
+    db.prepare(`
+      UPDATE central_profile_flags
+      SET screening_id = ?, snapshot_json = ?, flagged_at = ?, updated_at = ?
+      WHERE id = ? AND user_id = ?
+    `).run(screeningId, JSON.stringify(snapshot), now, now, existing.id, req.user.id);
+  } else {
+    db.prepare(`
+      INSERT INTO central_profile_flags (
+        id, user_id, source_type, screening_id, snapshot_json, flagged_at, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(createId("cpf"), req.user.id, sourceType, screeningId, JSON.stringify(snapshot), now, now, now);
+  }
+
+  const rows = db.prepare("SELECT * FROM central_profile_flags WHERE user_id = ?").all(req.user.id);
+  res.status(existing ? 200 : 201).json({ flags: orderedFlags(rows) });
+});
