@@ -7,6 +7,7 @@ import { config } from "./config.js";
 import { migrate } from "./db.js";
 import { authRouter } from "./routes/auth.js";
 import { dashboardRouter } from "./routes/dashboard.js";
+import { centralProfileRouter } from "./routes/centralProfile.js";
 
 await migrate();
 
@@ -21,6 +22,7 @@ app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 300, standardHeaders: true,
 app.get("/api/health", (req, res) => res.json({ ok: true, service: "gait-auth-api" }));
 app.use("/api/auth", authRouter);
 app.use("/api/dashboard", dashboardRouter);
+app.use("/api/central-profile", centralProfileRouter);
 
 app.use((req, res) => res.status(404).json({ message: "Route not found." }));
 
