@@ -73,6 +73,20 @@ export async function migrate() {
       created_at TEXT NOT NULL,
       FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET NULL
     );
+
+    CREATE TABLE IF NOT EXISTS clinical_profiles (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL UNIQUE,
+      height_cm REAL,
+      weight_kg REAL,
+      walking_aid TEXT,
+      fall_history TEXT,
+      primary_symptoms TEXT,
+      clinical_notes TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
   `);
 
   addColumn("users", "verification_status", "TEXT NOT NULL DEFAULT 'approved'");
