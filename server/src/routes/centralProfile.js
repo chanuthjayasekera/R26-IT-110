@@ -97,3 +97,49 @@ centralProfileRouter.post("/patient/flags", requireAuth, requireRole("patient"),
   const rows = db.prepare("SELECT * FROM central_profile_flags WHERE user_id = ?").all(req.user.id);
   res.status(existing ? 200 : 201).json({ flags: orderedFlags(rows) });
 });
+
+centralProfileRouter.get("/professional/profiles", requireAuth, requireRole("professional"), requireVerifiedProfessional, (req, res) => {
+  const rows = db.prepare(`
+    SELECT
+      u.id AS patient_id,
+      u.full_name,
+      u.email,
+      u.created_at AS patient_created_at,
+      cpf.*
+    FROM users u
+    JOIN central_profile_flags cpf ON cpf.user_id = u.id
+    WHERE u.role = 'patient'
+    ORDER BY cpf.updated_at DESC
+  `).all();
+
+  const profiles = new Map();
+  for (const row of rows) {
+    if (!profiles.has(row.patient_id)) {
+      profiles.set(row.patient_id, {
+        patient: {
+          id: row.patient_id,
+          fullName: row.full_name,
+          email: row.email,
+          createdAt: row.patient_created_at
+        },
+        flags: []
+      });
+    }
+
+    profiles.get(row.patient_id).flags.push(publicFlag(row));
+  }
+
+  res.json({
+    profiles: [...profiles.values()].map((profile) => ({
+      ...profile,
+      flags: orderedFlags(profile.flags.map((flag) => ({
+        id: flag.id,
+        source_type: flag.sourceType,
+        screening_id: flag.screeningId,
+        snapshot_json: JSON.stringify(flag.snapshot),
+        flagged_at: flag.flaggedAt,
+        updated_at: flag.updatedAt
+      })))
+    }))
+  });
+});
