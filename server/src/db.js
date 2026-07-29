@@ -87,6 +87,22 @@ export async function migrate() {
       updated_at TEXT NOT NULL,
       FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
     );
+
+    CREATE TABLE IF NOT EXISTS central_profile_flags (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      source_type TEXT NOT NULL,
+      screening_id TEXT NOT NULL,
+      snapshot_json TEXT NOT NULL,
+      flagged_at TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      UNIQUE(user_id, source_type),
+      FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_central_profile_flags_user
+      ON central_profile_flags(user_id, updated_at DESC);
   `);
 
   addColumn("users", "verification_status", "TEXT NOT NULL DEFAULT 'approved'");
