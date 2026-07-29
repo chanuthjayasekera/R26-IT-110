@@ -21,7 +21,8 @@ function navFor(user) {
       ["Normal vs Abnormal Detection", "/patient/detection/normal-abnormal"],
       ["SCA and KOA Detection", "/patient/detection/sca-koa"],
       ["PD Detection", "/patient/detection/pd"],
-      ["Rehab Exercise Detection", "/patient/detection/rehab-exercise"]
+      ["Rehab Exercise Detection", "/patient/detection/rehab-exercise"],
+      ["Centralized Profile", "/patient/central-profile"]
     ];
   }
   if (user.role === "professional") {
@@ -29,7 +30,7 @@ function navFor(user) {
       ["Upload Risks", "/professional"],
       ["Upload Recommendations", "/professional"],
       ["Upload Rehabilitation", "/professional"],
-      ["Engage Patient Profiles", "/professional"]
+      ["Engage Patient Profiles", "/professional/central-profiles"]
     ];
   }
   return [
