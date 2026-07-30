@@ -314,6 +314,64 @@ export default function RehabExerciseDetection() {
             </Box>
 
             {error && <Alert severity="error">{error}</Alert>}
+
+            <Grid2 container spacing={3} component="form" onSubmit={submit}>
+              <Grid2 size={{ xs: 12, lg: 8 }}>
+                <Card className="rehab-workspace-card">
+                  <CardContent>
+                    <Stack spacing={2.5}>
+                      <Stack direction="row" spacing={1.5} alignItems="center">
+                        <UploadFileIcon color="primary" />
+                        <Box>
+                          <Typography variant="h5" fontWeight={900}>Upload exercise video</Typography>
+                          <Typography color="text.secondary">Use a clear seated recording with the full upper body visible.</Typography>
+                        </Box>
+                      </Stack>
+                      <Box
+                        className={previewUrl ? "rehab-upload-zone has-video" : file ? "rehab-upload-zone has-file" : "rehab-upload-zone"}
+                        onDragOver={(event) => event.preventDefault()}
+                        onDrop={(event) => {
+                          event.preventDefault();
+                          handleFile(event.dataTransfer.files?.[0]);
+                        }}
+                      >
+                        {file && (
+                          <IconButton type="button" className="rehab-upload-close" color="error" onClick={removeFile} aria-label="Remove selected file">
+                            <CloseIcon />
+                          </IconButton>
+                        )}
+                        {previewUrl ? (
+                          <>
+                            <Stack direction="row" spacing={1} alignItems="center" className="rehab-preview-title">
+                              <VideoCameraBackIcon color="primary" />
+                              <Box flex={1}>
+                                <Typography fontWeight={900}>Video preview</Typography>
+                                <Typography color="text.secondary">{file.name} - {fileSize(file)}</Typography>
+                              </Box>
+                              <Button component="label" variant="outlined" size="small" startIcon={<UploadFileIcon />}>
+                                Replace
+                                <input hidden type="file" accept=".mp4,.mov,.avi,.mkv,video/mp4,video/quicktime" onChange={(event) => handleFile(event.target.files?.[0])} />
+                              </Button>
+                            </Stack>
+                            <video className="rehab-inline-video" controls src={previewUrl} />
+                          </>
+                        ) : (
+                          <>
+                            <UploadFileIcon />
+                            <Typography fontWeight={900}>{file ? file.name : "Drop video here or choose a file"}</Typography>
+                            <Typography color="text.secondary">{file ? fileSize(file) : "MP4, MOV, AVI, or MKV"}</Typography>
+                            <Button component="label" variant="contained" startIcon={<UploadFileIcon />}>
+                              Choose file
+                              <input hidden type="file" accept=".mp4,.mov,.avi,.mkv,video/mp4,video/quicktime" onChange={(event) => handleFile(event.target.files?.[0])} />
+                            </Button>
+                          </>
+                        )}
+                      </Box>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid2>
+            </Grid2>
           </Stack>
         </Grid2>
       </Grid2>
