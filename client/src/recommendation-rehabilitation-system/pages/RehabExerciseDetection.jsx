@@ -401,6 +401,51 @@ export default function RehabExerciseDetection() {
                 </Card>
               </Grid2>
             </Grid2>
+
+            <Card className="rehab-workspace-card">
+              <CardContent>
+                <Stack spacing={2}>
+                  <Stack direction={{ xs: "column", md: "row" }} spacing={1.5} justifyContent="space-between">
+                    <Stack direction="row" spacing={1.5} alignItems="center">
+                      <HistoryIcon color="primary" />
+                      <Typography variant="h5" fontWeight={900}>Latest saved {copy.shortLabel} outcomes</Typography>
+                    </Stack>
+                    <Stack className="rehab-history-toolbar" direction={{ xs: "column", lg: "row" }} spacing={1.2}>
+                      <Stack className="rehab-history-filters" direction={{ xs: "column", sm: "row" }} spacing={1.2}>
+                        <FormControl size="small" className="rehab-history-filter">
+                          <InputLabel>Condition</InputLabel>
+                          <Select label="Condition" value={conditionFilter} onChange={(event) => setConditionFilter(event.target.value)}>
+                            <MenuItem value="all">All</MenuItem>
+                            <MenuItem value="correct">Correct posture</MenuItem>
+                            <MenuItem value="incorrect">Incorrect posture</MenuItem>
+                            <MenuItem value="low_reliability">Low reliability</MenuItem>
+                          </Select>
+                        </FormControl>
+                        <TextField
+                          className="rehab-history-filter"
+                          size="small"
+                          label="Date"
+                          type="date"
+                          value={dateFilter}
+                          onChange={(event) => setDateFilter(event.target.value)}
+                          InputLabelProps={{ shrink: true }}
+                        />
+                      </Stack>
+                      <Button
+                        className="rehab-danger-button rehab-clear-all-button"
+                        color="error"
+                        variant="outlined"
+                        startIcon={<DeleteSweepIcon />}
+                        disabled={clearingAll || exerciseScreenings.length === 0}
+                        onClick={clearExerciseScreenings}
+                      >
+                        Clear all
+                      </Button>
+                    </Stack>
+                  </Stack>
+                </Stack>
+              </CardContent>
+            </Card>
           </Stack>
         </Grid2>
       </Grid2>
