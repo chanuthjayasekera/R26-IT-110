@@ -109,13 +109,76 @@ function resultLabel(screening) {
   return screening?.isCorrect ? "Correct posture" : "Incorrect posture";
 }
 
+const retainedExerciseUploads = new Map();
+
+function retainedUploadForUser(userId) {
+  return userId ? retainedExerciseUploads.get(userId) || null : null;
+}
+
+function rememberUpload(userId, file) {
+  if (!userId) return;
+  if (file) retainedExerciseUploads.set(userId, file);
+  else retainedExerciseUploads.delete(userId);
+}
+
 export default function RehabExerciseDetection() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const userId = user?.id || "";
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeExercise = exerciseFromParams(searchParams.get("exercise"));
+  const [screenings, setScreenings] = useState([]);
+  const [file, setFile] = useState(() => retainedUploadForUser(userId));
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState("");
+  const [clearingAll, setClearingAll] = useState(false);
+  const [conditionFilter, setConditionFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("");
+  const [navCollapsed, setNavCollapsed] = useState(false);
   const cards = [
     ["Exercise upload", "Upload rehabilitation exercise videos for pose correctness detection."],
     ["Correctness check", "Prepared for trained rehab model feedback on exercise form."],
     ["Repetition quality", "Track repetition completion quality and consistency."],
     ["Recommendations", "Retrieve clinician-uploaded rehab plans and safety guidance."]
   ];
+
+  useEffect(() => {
+    setFile(retainedUploadForUser(userId));
+  }, [userId]);
+
+  useEffect(() => {
+    let alive = true;
+    api.get("/exercise-detection/clinical-profile")
+      .then((res) => {
+        if (alive) setScreenings(res.data.screenings || []);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!file) {
+      setPreviewUrl("");
+      return undefined;
+    }
+    const nextUrl = URL.createObjectURL(file);
+    setPreviewUrl(nextUrl);
+    return () => URL.revokeObjectURL(nextUrl);
+  }, [file]);
+
+  const exerciseScreenings = useMemo(
+    () => screenings.filter((item) => item.exerciseKey === activeExercise),
+    [screenings, activeExercise]
+  );
+  const filteredScreenings = useMemo(
+    () => filterOutcomes(exerciseScreenings, conditionFilter, dateFilter),
+    [exerciseScreenings, conditionFilter, dateFilter]
+  );
+  const copy = exercises[activeExercise];
 
   return (
     <Container maxWidth="xl" className="rehab-page">
