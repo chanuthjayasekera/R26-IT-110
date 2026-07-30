@@ -234,6 +234,41 @@ export default function RehabExerciseDetection() {
     }
   }
 
+  async function deleteScreening(id) {
+    if (!window.confirm("Delete this saved exercise result?")) return;
+    setDeletingId(id);
+    setError("");
+    try {
+      const res = await api.delete(`/exercise-detection/screenings/${id}`);
+      setScreenings(res.data.screenings || screenings.filter((item) => item.id !== id));
+    } catch (err) {
+      const apiError = getApiError(err);
+      setError(apiError.message || "Unable to delete exercise result.");
+    } finally {
+      setDeletingId("");
+    }
+  }
+
+  async function clearExerciseScreenings() {
+    if (exerciseScreenings.length === 0) return;
+    if (!window.confirm(`Clear all saved ${copy.shortLabel} results?`)) return;
+    setClearingAll(true);
+    setDeletingId("all");
+    setError("");
+    try {
+      const res = await api.delete(`/exercise-detection/screenings?exercise=${activeExercise}`);
+      setScreenings(res.data.screenings || []);
+    } catch (err) {
+      const apiError = getApiError(err);
+      setError(apiError.message || "Unable to clear exercise results.");
+    } finally {
+      setClearingAll(false);
+      setDeletingId("");
+    }
+  }
+
+  const itemClass = navCollapsed ? "rehab-nav-label hidden" : "rehab-nav-label";
+
   return (
     <Container maxWidth="xl" className="rehab-page">
       <Stack spacing={4}>
