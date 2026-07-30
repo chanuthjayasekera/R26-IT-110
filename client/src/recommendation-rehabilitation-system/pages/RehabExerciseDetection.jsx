@@ -180,6 +180,60 @@ export default function RehabExerciseDetection() {
   );
   const copy = exercises[activeExercise];
 
+  function chooseExercise(exerciseKey) {
+    const params = new URLSearchParams();
+    params.set("exercise", exerciseKey);
+    setSearchParams(params);
+    setError("");
+  }
+
+  function handleFile(nextFile) {
+    if (!nextFile) return;
+    setFile(nextFile);
+    setError("");
+    rememberUpload(userId, nextFile);
+  }
+
+  function removeFile(event) {
+    event?.preventDefault();
+    event?.stopPropagation();
+    setFile(null);
+    setPreviewUrl("");
+    setError("");
+    rememberUpload(userId, null);
+  }
+
+  async function submit(event) {
+    event.preventDefault();
+    if (!file) {
+      setError("Please upload an exercise video before running the analysis.");
+      return;
+    }
+
+    setBusy(true);
+    setError("");
+    const payload = new FormData();
+    payload.append("exerciseFile", file);
+    payload.append("exerciseKey", activeExercise);
+
+    try {
+      const res = await api.post("/exercise-detection/screenings", payload, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      navigate(`/patient/results/rehab-exercise?id=${res.data.screening.id}`, {
+        state: {
+          screening: res.data.screening,
+          profile: res.data.profile
+        }
+      });
+    } catch (err) {
+      const apiError = getApiError(err);
+      setError(apiError.message || "Exercise analysis failed.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <Container maxWidth="xl" className="rehab-page">
       <Stack spacing={4}>
