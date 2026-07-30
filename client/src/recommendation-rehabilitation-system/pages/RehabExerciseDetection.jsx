@@ -21,18 +21,16 @@ import {
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import AccessibilityNewIcon from "@mui/icons-material/AccessibilityNew";
 import AssessmentIcon from "@mui/icons-material/Assessment";
-import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
-import UploadFileIcon from "@mui/icons-material/UploadFile";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
+import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import HistoryIcon from "@mui/icons-material/History";
 import ReportIcon from "@mui/icons-material/Report";
-import RepeatIcon from "@mui/icons-material/Repeat";
-import TipsAndUpdatesIcon from "@mui/icons-material/TipsAndUpdates";
+import UploadFileIcon from "@mui/icons-material/UploadFile";
 import VideoCameraBackIcon from "@mui/icons-material/VideoCameraBack";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { api, getApiError } from "../../common/api/http.js";
@@ -137,12 +135,6 @@ export default function RehabExerciseDetection() {
   const [conditionFilter, setConditionFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("");
   const [navCollapsed, setNavCollapsed] = useState(false);
-  const cards = [
-    ["Exercise upload", "Upload rehabilitation exercise videos for pose correctness detection."],
-    ["Correctness check", "Prepared for trained rehab model feedback on exercise form."],
-    ["Repetition quality", "Track repetition completion quality and consistency."],
-    ["Recommendations", "Retrieve clinician-uploaded rehab plans and safety guidance."]
-  ];
 
   useEffect(() => {
     setFile(retainedUploadForUser(userId));
