@@ -60,6 +60,55 @@ const exercises = {
   }
 };
 
+function exerciseFromParams(value) {
+  return exercises[value] ? value : "gesture3";
+}
+
+function formatDate(value) {
+  if (!value) return "";
+  return new Intl.DateTimeFormat("en", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
+}
+
+function fileSize(file) {
+  if (!file) return "";
+  return `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function percent(value) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) return "-";
+  return `${Math.round(Number(value) * 100)}%`;
+}
+
+function outcomeCondition(screening) {
+  if (screening?.reliabilityLevel === "Low") return "low_reliability";
+  return screening?.isCorrect ? "correct" : "incorrect";
+}
+
+function outcomeDate(screening) {
+  if (!screening?.createdAt) return "";
+  const date = new Date(screening.createdAt);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toISOString().slice(0, 10);
+}
+
+function filterOutcomes(screenings, condition, date) {
+  return screenings.filter((screening) => {
+    const conditionOk = condition === "all" || outcomeCondition(screening) === condition;
+    const dateOk = !date || outcomeDate(screening) === date;
+    return conditionOk && dateOk;
+  });
+}
+
+function resultTone(screening) {
+  if (screening?.reliabilityLevel === "Low") return "warning";
+  return screening?.isCorrect ? "success" : "error";
+}
+
+function resultLabel(screening) {
+  if (screening?.reliabilityLevel === "Low") return "Review needed";
+  return screening?.isCorrect ? "Correct posture" : "Incorrect posture";
+}
+
 export default function RehabExerciseDetection() {
   const cards = [
     ["Exercise upload", "Upload rehabilitation exercise videos for pose correctness detection."],
