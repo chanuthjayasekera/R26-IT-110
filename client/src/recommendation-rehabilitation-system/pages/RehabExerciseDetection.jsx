@@ -371,6 +371,35 @@ export default function RehabExerciseDetection() {
                   </CardContent>
                 </Card>
               </Grid2>
+
+              <Grid2 size={{ xs: 12, lg: 4 }}>
+                <Card className="rehab-workspace-card">
+                  <CardContent>
+                    <Stack spacing={2.5}>
+                      <Stack direction="row" spacing={1.5} alignItems="center">
+                        <CheckCircleIcon color="primary" />
+                        <Box>
+                          <Typography variant="h5" fontWeight={900}>Model outcome</Typography>
+                          <Typography color="text.secondary">Correctness, probability, and timed posture windows are saved after analysis.</Typography>
+                        </Box>
+                      </Stack>
+                      <Box className="rehab-model-note">
+                        <Typography fontWeight={900}>{copy.shortLabel}</Typography>
+                        <Typography color="text.secondary">Selected exercise model</Typography>
+                      </Box>
+                      {busy && (
+                        <Box>
+                          <LinearProgress />
+                          <Typography className="rehab-processing-text">Extracting pose, running the exercise model, and preparing timed windows...</Typography>
+                        </Box>
+                      )}
+                      <Button type="submit" size="large" variant="contained" startIcon={<CheckCircleIcon />} disabled={busy}>
+                        {busy ? "Analyzing..." : copy.action}
+                      </Button>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid2>
             </Grid2>
           </Stack>
         </Grid2>
