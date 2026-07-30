@@ -443,6 +443,38 @@ export default function RehabExerciseDetection() {
                       </Button>
                     </Stack>
                   </Stack>
+                  {exerciseScreenings.length === 0 ? (
+                    <Typography color="text.secondary">No {copy.shortLabel} outcomes have been saved yet.</Typography>
+                  ) : filteredScreenings.length === 0 ? (
+                    <Typography color="text.secondary">No saved outcomes match these filters.</Typography>
+                  ) : (
+                    <Grid2 container spacing={2}>
+                      {filteredScreenings.slice(0, 8).map((screening) => (
+                        <Grid2 key={screening.id} size={{ xs: 12, md: 6, xl: 3 }}>
+                          <Box className="rehab-history-item">
+                            <Stack direction="row" alignItems="flex-start" justifyContent="space-between">
+                              <Chip
+                                size="small"
+                                color={resultTone(screening)}
+                                icon={screening.isCorrect ? <CheckCircleIcon /> : <WarningAmberIcon />}
+                                label={resultLabel(screening)}
+                              />
+                              <IconButton size="small" disabled={deletingId === "all" || deletingId === screening.id} onClick={() => deleteScreening(screening.id)}>
+                                <DeleteOutlineIcon fontSize="small" />
+                              </IconButton>
+                            </Stack>
+                            <Typography fontWeight={900}>{screening.finalPrediction || "Result unavailable"}</Typography>
+                            <Typography color="text.secondary">{formatDate(screening.createdAt)}</Typography>
+                            <Typography className="rehab-metric-helper">Correct probability {percent(screening.meanCorrectProbability)}</Typography>
+                            <Typography className="rehab-metric-helper">Incorrect windows {screening.windowReport?.incorrect_windows?.length ?? 0}</Typography>
+                            <Button component={Link} to={`/patient/results/rehab-exercise?id=${screening.id}`} size="small" startIcon={<ReportIcon />}>
+                              Open report
+                            </Button>
+                          </Box>
+                        </Grid2>
+                      ))}
+                    </Grid2>
+                  )}
                 </Stack>
               </CardContent>
             </Card>
