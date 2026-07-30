@@ -271,49 +271,52 @@ export default function RehabExerciseDetection() {
 
   return (
     <Container maxWidth="xl" className="rehab-page">
-      <Stack spacing={4}>
-        <Box className="rehab-hero">
-          <Stack spacing={2}>
-            <Typography variant="overline" fontWeight={900} color="primary">Component 4</Typography>
-            <Typography variant="h3" fontWeight={900}>Rehab Exercise Detection</Typography>
-            <Typography color="text.secondary" maxWidth="860px">
-              Rehabilitation workspace for exercise video upload, pose correctness detection, repetition quality monitoring, improvement tracking, and recommendation retrieval.
-            </Typography>
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-              <Button variant="contained" startIcon={<UploadFileIcon />}>Upload exercise video</Button>
-              <Button component={Link} to="/patient/results/rehab-exercise" variant="contained">Detect</Button>
-              <Button component={Link} to="/patient" variant="outlined">Back to patient dashboard</Button>
-            </Stack>
-          </Stack>
-          <Box className="rehab-visual-card">
-            <FitnessCenterIcon />
-            <Typography fontWeight={900}>Rehab Support</Typography>
+      <Grid2 container spacing={3}>
+        <Grid2 size={{ xs: 12, md: navCollapsed ? 1.1 : 3, lg: navCollapsed ? 0.9 : 2.7 }}>
+          <Box className={navCollapsed ? "rehab-side-nav collapsed" : "rehab-side-nav"}>
+            <Button
+              className="rehab-nav-toggle"
+              variant="outlined"
+              onClick={() => setNavCollapsed((old) => !old)}
+              startIcon={navCollapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+            >
+              <span className={itemClass}>{navCollapsed ? "" : "Collapse"}</span>
+            </Button>
+            {Object.entries(exercises).map(([key, item]) => (
+              <Button
+                key={key}
+                variant={activeExercise === key ? "contained" : "outlined"}
+                startIcon={item.icon}
+                onClick={() => chooseExercise(key)}
+              >
+                <span className={itemClass}>{item.shortLabel}</span>
+              </Button>
+            ))}
+            <Button component={Link} to="/patient/results/rehab-exercise" variant="text" startIcon={<AssessmentIcon />}>
+              <span className={itemClass}>Results</span>
+            </Button>
+            <Button component={Link} to="/patient" variant="text">
+              <span className={itemClass}>Dashboard</span>
+            </Button>
           </Box>
-        </Box>
-
-        <Grid2 container spacing={3}>
-          {cards.map(([title, description], index) => (
-            <Grid2 key={title} size={{ xs: 12, md: 6, lg: 3 }}>
-              <Card className="rehab-card">
-                <CardContent>
-                  <Stack spacing={2}>
-                    <Box className="rehab-icon">
-                      {index === 0 && <UploadFileIcon />}
-                      {index === 1 && <CheckCircleIcon />}
-                      {index === 2 && <RepeatIcon />}
-                      {index === 3 && <TipsAndUpdatesIcon />}
-                    </Box>
-                    <Typography variant="h6">{title}</Typography>
-                    <Typography color="text.secondary">{description}</Typography>
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Grid2>
-          ))}
         </Grid2>
 
-       
-      </Stack>
+        <Grid2 size={{ xs: 12, md: navCollapsed ? 10.9 : 9, lg: navCollapsed ? 11.1 : 9.3 }}>
+          <Stack spacing={3}>
+            <Box className="rehab-hero compact">
+              <Stack spacing={1.5}>
+                <Chip icon={<VideoCameraBackIcon />} label="Exercise quality analysis" className="rehab-hero-chip" />
+                <Typography variant="h3" fontWeight={900}>{copy.label}</Typography>
+                <Typography color="text.secondary">
+                  Upload a matching seated exercise video to detect correct and incorrect movement windows, then save a report-ready outcome profile.
+                </Typography>
+              </Stack>
+            </Box>
+
+            {error && <Alert severity="error">{error}</Alert>}
+          </Stack>
+        </Grid2>
+      </Grid2>
     </Container>
   );
 }
