@@ -2,12 +2,23 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+function parseClientOrigins(value) {
+  return String(value || "http://localhost:5173")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+}
+
+const clientOrigins = parseClientOrigins(process.env.CLIENT_ORIGIN);
+
 export const config = {
   port: Number(process.env.PORT || 5000),
-  clientOrigin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
+  clientOrigin: clientOrigins[0],
+  clientOrigins,
   jwtSecret: process.env.JWT_SECRET || "dev_only_replace_this_secret",
   nodeEnv: process.env.NODE_ENV || "development",
   cookieName: "gait_session",
+  pythonPath: process.env.PYTHON_PATH || process.env.PYTHON || (process.platform === "win32" ? "python" : "python3"),
   smtp: {
     host: process.env.SMTP_HOST || "",
     port: Number(process.env.SMTP_PORT || 587),
