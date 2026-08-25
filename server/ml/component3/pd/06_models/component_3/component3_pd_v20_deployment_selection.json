@@ -1,0 +1,32 @@
+{
+  "component": "Component 3",
+  "detector": "PD standalone normal-aware screening model",
+  "selected_version": "PD V20",
+  "selected_model_path": "06_models/component_3/component3_pd_model_v20_final_attempt.joblib",
+  "selected_feature_list_path": "06_models/component_3/component3_pd_feature_list_v20.json",
+  "selected_settings_path": "06_models/component_3/component3_pd_settings_v20_final_attempt.json",
+  "model_sha256": "8b4b84422446fd2783e423ef4ae033a680370721ae983c4dfe18b7632ceb12c0",
+  "aggregation": "median",
+  "threshold": 0.275,
+  "locked_test_metrics": {
+    "accuracy": 0.9608938547486033,
+    "precision": 0.76,
+    "recall": 0.95,
+    "f1": 0.8444444444444444,
+    "tn": 153,
+    "fp": 6,
+    "fn": 1,
+    "tp": 19
+  },
+  "normal_test_result": {
+    "normal_videos": 31,
+    "correctly_rejected": 31,
+    "false_positive_as_pd": 0,
+    "specificity": 1.0
+  },
+  "known_limitation": "Missed pd_L2R_P048 in the locked test.",
+  "selection_basis": "User selected V20 because a standalone PD model trained with normal negatives is required.",
+  "rollback_version": "PD V14 XGBoost precision-tuned",
+  "rollback_model_path": "06_models/component_3/component3_pd_model_v14_xgboost_precision_tuned.joblib",
+  "clinical_note": "Screening support only; not a medical diagnosis."
+}

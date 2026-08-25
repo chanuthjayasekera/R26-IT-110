@@ -25,7 +25,7 @@ export default function Home() {
         title: "Detect movement risk early, track recovery clearly.",
         quote: "A patient’s walking pattern can become a timeline of neurological and musculoskeletal health.",
         description:
-          "Secure dashboards for normal vs abnormal screening, SCA and KOA detection, Parkinson detection, clinical risk visibility, and rehabilitation support.",
+          "Secure dashboards for normal vs abnormal screening, SCA and KOA detection, PD and neuropathy detection, clinical risk visibility, and rehabilitation support.",
         icon: <TimelineIcon />
       },
       {
@@ -174,7 +174,7 @@ export default function Home() {
           <Box className="system-step">
             <Typography fontWeight={900}>02</Typography>
             <Typography variant="h6" fontWeight={900}>Classify</Typography>
-            <Typography color="text.secondary">SCA, KOA, and Parkinson detection paths.</Typography>
+            <Typography color="text.secondary">SCA, KOA, PD, and neuropathy detection paths.</Typography>
           </Box>
         </Grid2>
 

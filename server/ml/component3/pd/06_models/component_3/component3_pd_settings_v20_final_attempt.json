@@ -1,0 +1,69 @@
+{
+  "generated_at_utc": "2026-07-09T08:56:39.980639+00:00",
+  "status": "locked_test_failed_v14_remains_champion",
+  "v14_protected_baseline": true,
+  "model_version": "PD V20 final normal-inclusive hard-positive attempt",
+  "selected_model": "histgradientboosting",
+  "selected_aggregation": "median",
+  "selected_threshold": 0.275,
+  "selected_oof_metrics": {
+    "accuracy": 0.9481065918653576,
+    "precision": 0.8611111111111112,
+    "recall": 0.808695652173913,
+    "f1": 0.8340807174887892,
+    "tn": 583,
+    "fp": 15,
+    "fn": 22,
+    "tp": 93,
+    "video_auc": 0.9686491202559255,
+    "video_average_precision": 0.9021471423817599,
+    "false_positive_classes": "{\"antalgic\": 2, \"diplegia\": 2, \"hemiplegia\": 2, \"koa\": 7, \"neuropathic\": 1, \"sca\": 1}"
+  },
+  "training_pd_videos": 115,
+  "hard_positive_subjects": [
+    "pd_P153",
+    "pd_P159"
+  ],
+  "hard_positive_multiplier": 1.5,
+  "normal_development_videos": 126,
+  "total_development_videos": 713,
+  "feature_count": 1028,
+  "direction_transform": "x_flip_swap_lr",
+  "p169_challenge_pass": true,
+  "p169_probability": 0.8252750863358196,
+  "locked_test_opened": true,
+  "locked_test_metrics": {
+    "accuracy": 0.9608938547486033,
+    "precision": 0.76,
+    "recall": 0.95,
+    "f1": 0.8444444444444444,
+    "tn": 153,
+    "fp": 6,
+    "fn": 1,
+    "tp": 19
+  },
+  "locked_abnormal_only_metrics": {
+    "accuracy": 0.9527027027027027,
+    "precision": 0.76,
+    "recall": 0.95,
+    "f1": 0.8444444444444444,
+    "tn": 122,
+    "fp": 6,
+    "fn": 1,
+    "tp": 19
+  },
+  "locked_normal_specificity": 1.0,
+  "locked_normal_false_positives": 0,
+  "promotion_pass": false,
+  "promotion_rules": {
+    "locked_pd_recall": "1.0 (20/20)",
+    "locked_abnormal_false_positives": "<= 6",
+    "locked_normal_false_positives": "<= 1 of 31"
+  },
+  "model_path": "D:\\gait_dataset_project_structure\\06_models\\component_3\\component3_pd_model_v20_final_attempt.joblib",
+  "feature_list_path": "D:\\gait_dataset_project_structure\\06_models\\component_3\\component3_pd_feature_list_v20.json",
+  "fold_manifest": "D:\\gait_dataset_project_structure\\04_splits\\component_3_pd_v20\\component3_pd_v20_development_five_fold_subjects.csv",
+  "candidate_report": "D:\\gait_dataset_project_structure\\07_reports\\component_3\\component3_pd_v20_oof_candidate_summary.csv",
+  "p169_report": "D:\\gait_dataset_project_structure\\07_reports\\component_3\\component3_pd_v20_p169_challenge_report.csv",
+  "locked_test_report": "D:\\gait_dataset_project_structure\\07_reports\\component_3\\component3_pd_v20_locked_test_video_report.csv"
+}

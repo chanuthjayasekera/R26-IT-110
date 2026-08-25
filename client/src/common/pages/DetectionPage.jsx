@@ -13,7 +13,7 @@ const detectionConfigs = {
     title: "Normal vs Abnormal Gait Detection",
     description: "Upload a gait video and prepare it for camera-only screening. Your trained model can be connected here to classify normal and abnormal gait patterns.",
     steps: ["Video upload", "Pose extraction", "Window-level screening", "Severity score preview"],
-    next: "After abnormal screening, results can flow into SCA, KOA, and PD detection."
+    next: "After abnormal screening, results can flow into SCA, KOA, PD, and neuropathy detection."
   },
   "sca-koa": {
     eyebrow: "Component 2",
@@ -24,13 +24,13 @@ const detectionConfigs = {
   },
   pd: {
     eyebrow: "Component 3",
-    title: "Parkinson Detection",
-    description: "This page is prepared for Parkinson detection, severity estimation, risk interpretation, and persistent profile updates.",
-    steps: ["Load gait features", "Run PD model", "Retrieve risk profile", "Store longitudinal result"],
+    title: "PD & Neuropathy Detection",
+    description: "This page is prepared for PD and neuropathy detection, comparison views, risk interpretation, and persistent profile updates.",
+    steps: ["Load gait features", "Run PD model", "Run neuropathy model", "Store longitudinal result"],
     next: "Risk results can later connect to clinician-defined rules and central patient history."
   },
   rehab: {
-    eyebrow: "Component 4",
+    eyebrow: "Exercise quality",
     title: "Rehab & Recommendation System",
     description: "This page is prepared for rehabilitation exercise upload, pose correctness monitoring, repetition quality, and personalized recommendations.",
     steps: ["Upload rehab exercise", "Pose correctness check", "Quality feedback", "Recommendation retrieval"],

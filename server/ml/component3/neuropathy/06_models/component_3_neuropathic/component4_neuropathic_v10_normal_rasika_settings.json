@@ -1,0 +1,741 @@
+{
+  "component": "Component 4",
+  "detector": "Neuropathic gait specialist detector",
+  "version": "Neuropathic V10 normal-inclusive Rasika hard-positive pattern aggregation",
+  "master_table": "D:\\gait_dataset_project_structure\\05_preprocessed_windows\\component_1\\master_component1_windows_v7_gait_features.csv",
+  "positive_class": "neuropathic",
+  "classes_used": [
+    "antalgic",
+    "diplegia",
+    "hemiplegia",
+    "koa",
+    "neuropathic",
+    "normal",
+    "pd",
+    "sca"
+  ],
+  "normal_class_included_as_negative": true,
+  "random_state": 20260628,
+  "split_protocol": {
+    "type": "stratified permanent subject test plus five-fold stratified subject OOF development",
+    "test_fraction": 0.2,
+    "oof_folds": 5,
+    "selection_data": "development OOF only",
+    "test_used_for_selection": false,
+    "forced_domain_stress_test_subject": null,
+    "split_file": "D:\\gait_dataset_project_structure\\04_splits\\component_4_neuropathic\\neuropathic_v10_normal_rasika_subject_assignments.csv"
+  },
+  "training_data_policy": {
+    "holdout_metrics_model": "saved_model",
+    "saved_deployment_model": "development_subjects_only",
+    "random_window_split_used": false,
+    "split_unit": "subject",
+    "deployment_refit_on_all_data": false,
+    "holdout_eval_model_path": null
+  },
+  "feature_policy": {
+    "selected_feature_set": "gait_biomech",
+    "feature_count": 162,
+    "visibility_features_excluded": true,
+    "face_and_upper_body_raw_features_excluded": true,
+    "clip_length_indicator_excluded": true,
+    "allowed": [
+      "lower-body x/y/z statistics",
+      "gait-engineered features",
+      "specialist biomechanical features"
+    ]
+  },
+  "selected_model_name": "neuro_v10_gait_biomech_normal_guard",
+  "selected_model_params": {
+    "n_estimators": 800,
+    "max_features": 0.5,
+    "min_samples_leaf": 3,
+    "min_samples_split": 6,
+    "max_depth": null
+  },
+  "selected_weight_profile": "normal_guard_pd_antalgic_diplegia_hard_negative",
+  "decision_rule": "pattern_aggregation_mean_count_ratio_max",
+  "final_threshold": 0.44,
+  "recommended_video_setting": {
+    "mean_threshold": 0.44,
+    "window_threshold": 0.24,
+    "ratio_threshold": 0.1,
+    "count_threshold": 1,
+    "max_threshold": 0.3,
+    "min_total_windows": 5
+  },
+  "pattern_search_settings": {
+    "mean_thresholds": [
+      0.24,
+      0.28,
+      0.32,
+      0.36,
+      0.4,
+      0.44,
+      0.48,
+      0.52
+    ],
+    "window_thresholds": [
+      0.24,
+      0.28,
+      0.32,
+      0.36,
+      0.4,
+      0.44,
+      0.48,
+      0.52
+    ],
+    "ratio_thresholds": [
+      0.1,
+      0.15,
+      0.2,
+      0.25,
+      0.3,
+      0.35
+    ],
+    "count_thresholds": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "max_thresholds": [
+      0.3,
+      0.35,
+      0.4,
+      0.45,
+      0.5
+    ],
+    "min_total_windows": [
+      5
+    ],
+    "target_video_recall": 0.82,
+    "target_subject_recall": 0.8,
+    "target_video_precision": 0.75,
+    "target_subject_precision": 0.75,
+    "final_n_estimators": 800
+  },
+  "candidate_oof_results": {
+    "neuro_v10_lower_motion_v5_weight": {
+      "feature_set": "lower_motion",
+      "feature_count": 282,
+      "weight_profile": "pd_antalgic_diplegia_hard_negative",
+      "model_params": {
+        "n_estimators": 300,
+        "max_features": 0.4,
+        "min_samples_leaf": 4,
+        "min_samples_split": 8,
+        "max_depth": null
+      },
+      "selected_pattern_setting": {
+        "mean_threshold": 0.44,
+        "window_threshold": 0.52,
+        "ratio_threshold": 0.35,
+        "count_threshold": 1,
+        "max_threshold": 0.3,
+        "min_total_windows": 5
+      },
+      "eligible_settings": 1600,
+      "oof_video_metrics": {
+        "accuracy": 0.9649859943977591,
+        "precision": 0.8571428571428571,
+        "recall": 0.825,
+        "f1": 0.8407643312101911,
+        "tn": 623,
+        "fp": 11,
+        "fn": 14,
+        "tp": 66,
+        "confusion_matrix": [
+          [
+            623,
+            11
+          ],
+          [
+            14,
+            66
+          ]
+        ]
+      },
+      "oof_subject_metrics": {
+        "accuracy": 0.9695290858725761,
+        "precision": 0.8918918918918919,
+        "recall": 0.825,
+        "f1": 0.8571428571428571,
+        "tn": 317,
+        "fp": 4,
+        "fn": 7,
+        "tp": 33,
+        "confusion_matrix": [
+          [
+            317,
+            4
+          ],
+          [
+            7,
+            33
+          ]
+        ]
+      }
+    },
+    "neuro_v10_gait_biomech_v5_weight": {
+      "feature_set": "gait_biomech",
+      "feature_count": 162,
+      "weight_profile": "pd_antalgic_diplegia_hard_negative",
+      "model_params": {
+        "n_estimators": 300,
+        "max_features": 0.5,
+        "min_samples_leaf": 3,
+        "min_samples_split": 6,
+        "max_depth": null
+      },
+      "selected_pattern_setting": {
+        "mean_threshold": 0.44,
+        "window_threshold": 0.24,
+        "ratio_threshold": 0.1,
+        "count_threshold": 1,
+        "max_threshold": 0.3,
+        "min_total_windows": 5
+      },
+      "eligible_settings": 3260,
+      "oof_video_metrics": {
+        "accuracy": 0.9649859943977591,
+        "precision": 0.8481012658227848,
+        "recall": 0.8375,
+        "f1": 0.8427672955974843,
+        "tn": 622,
+        "fp": 12,
+        "fn": 13,
+        "tp": 67,
+        "confusion_matrix": [
+          [
+            622,
+            12
+          ],
+          [
+            13,
+            67
+          ]
+        ]
+      },
+      "oof_subject_metrics": {
+        "accuracy": 0.9667590027700831,
+        "precision": 0.8888888888888888,
+        "recall": 0.8,
+        "f1": 0.8421052631578947,
+        "tn": 317,
+        "fp": 4,
+        "fn": 8,
+        "tp": 32,
+        "confusion_matrix": [
+          [
+            317,
+            4
+          ],
+          [
+            8,
+            32
+          ]
+        ]
+      }
+    },
+    "neuro_v10_lower_motion_normal_guard": {
+      "feature_set": "lower_motion",
+      "feature_count": 282,
+      "weight_profile": "normal_guard_pd_antalgic_diplegia_hard_negative",
+      "model_params": {
+        "n_estimators": 300,
+        "max_features": 0.4,
+        "min_samples_leaf": 4,
+        "min_samples_split": 8,
+        "max_depth": null
+      },
+      "selected_pattern_setting": {
+        "mean_threshold": 0.44,
+        "window_threshold": 0.52,
+        "ratio_threshold": 0.3,
+        "count_threshold": 1,
+        "max_threshold": 0.3,
+        "min_total_windows": 5
+      },
+      "eligible_settings": 1670,
+      "oof_video_metrics": {
+        "accuracy": 0.9635854341736695,
+        "precision": 0.8375,
+        "recall": 0.8375,
+        "f1": 0.8375,
+        "tn": 621,
+        "fp": 13,
+        "fn": 13,
+        "tp": 67,
+        "confusion_matrix": [
+          [
+            621,
+            13
+          ],
+          [
+            13,
+            67
+          ]
+        ]
+      },
+      "oof_subject_metrics": {
+        "accuracy": 0.9695290858725761,
+        "precision": 0.8918918918918919,
+        "recall": 0.825,
+        "f1": 0.8571428571428571,
+        "tn": 317,
+        "fp": 4,
+        "fn": 7,
+        "tp": 33,
+        "confusion_matrix": [
+          [
+            317,
+            4
+          ],
+          [
+            7,
+            33
+          ]
+        ]
+      }
+    },
+    "neuro_v10_gait_biomech_normal_guard": {
+      "feature_set": "gait_biomech",
+      "feature_count": 162,
+      "weight_profile": "normal_guard_pd_antalgic_diplegia_hard_negative",
+      "model_params": {
+        "n_estimators": 300,
+        "max_features": 0.5,
+        "min_samples_leaf": 3,
+        "min_samples_split": 6,
+        "max_depth": null
+      },
+      "selected_pattern_setting": {
+        "mean_threshold": 0.44,
+        "window_threshold": 0.24,
+        "ratio_threshold": 0.1,
+        "count_threshold": 1,
+        "max_threshold": 0.3,
+        "min_total_windows": 5
+      },
+      "eligible_settings": 3055,
+      "oof_video_metrics": {
+        "accuracy": 0.9677871148459384,
+        "precision": 0.8701298701298701,
+        "recall": 0.8375,
+        "f1": 0.8535031847133758,
+        "tn": 624,
+        "fp": 10,
+        "fn": 13,
+        "tp": 67,
+        "confusion_matrix": [
+          [
+            624,
+            10
+          ],
+          [
+            13,
+            67
+          ]
+        ]
+      },
+      "oof_subject_metrics": {
+        "accuracy": 0.9667590027700831,
+        "precision": 0.8888888888888888,
+        "recall": 0.8,
+        "f1": 0.8421052631578947,
+        "tn": 317,
+        "fp": 4,
+        "fn": 8,
+        "tp": 32,
+        "confusion_matrix": [
+          [
+            317,
+            4
+          ],
+          [
+            8,
+            32
+          ]
+        ]
+      }
+    }
+  },
+  "final_oof_video_metrics": {
+    "accuracy": 0.9677871148459384,
+    "precision": 0.8701298701298701,
+    "recall": 0.8375,
+    "f1": 0.8535031847133758,
+    "tn": 624,
+    "fp": 10,
+    "fn": 13,
+    "tp": 67,
+    "confusion_matrix": [
+      [
+        624,
+        10
+      ],
+      [
+        13,
+        67
+      ]
+    ]
+  },
+  "final_oof_subject_metrics": {
+    "accuracy": 0.9667590027700831,
+    "precision": 0.8888888888888888,
+    "recall": 0.8,
+    "f1": 0.8421052631578947,
+    "tn": 317,
+    "fp": 4,
+    "fn": 8,
+    "tp": 32,
+    "confusion_matrix": [
+      [
+        317,
+        4
+      ],
+      [
+        8,
+        32
+      ]
+    ]
+  },
+  "untouched_test_video_metrics": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "tn": 159,
+    "fp": 0,
+    "fn": 0,
+    "tp": 20,
+    "confusion_matrix": [
+      [
+        159,
+        0
+      ],
+      [
+        0,
+        20
+      ]
+    ]
+  },
+  "untouched_test_subject_metrics": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "tn": 80,
+    "fp": 0,
+    "fn": 0,
+    "tp": 10,
+    "confusion_matrix": [
+      [
+        80,
+        0
+      ],
+      [
+        0,
+        10
+      ]
+    ]
+  },
+  "untouched_test_per_class_video_metrics": {
+    "antalgic": {
+      "accuracy": 1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tn": 20,
+      "fp": 0,
+      "fn": 0,
+      "tp": 0,
+      "confusion_matrix": [
+        [
+          20,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    "diplegia": {
+      "accuracy": 1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tn": 20,
+      "fp": 0,
+      "fn": 0,
+      "tp": 0,
+      "confusion_matrix": [
+        [
+          20,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    "hemiplegia": {
+      "accuracy": 1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tn": 20,
+      "fp": 0,
+      "fn": 0,
+      "tp": 0,
+      "confusion_matrix": [
+        [
+          20,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    "koa": {
+      "accuracy": 1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tn": 20,
+      "fp": 0,
+      "fn": 0,
+      "tp": 0,
+      "confusion_matrix": [
+        [
+          20,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    "neuropathic": {
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tn": 0,
+      "fp": 0,
+      "fn": 0,
+      "tp": 20,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          20
+        ]
+      ]
+    },
+    "normal": {
+      "accuracy": 1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tn": 32,
+      "fp": 0,
+      "fn": 0,
+      "tp": 0,
+      "confusion_matrix": [
+        [
+          32,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    "pd": {
+      "accuracy": 1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tn": 27,
+      "fp": 0,
+      "fn": 0,
+      "tp": 0,
+      "confusion_matrix": [
+        [
+          27,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    "sca": {
+      "accuracy": 1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tn": 20,
+      "fp": 0,
+      "fn": 0,
+      "tp": 0,
+      "confusion_matrix": [
+        [
+          20,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    }
+  },
+  "feature_importance_audit": {
+    "group_importance": {
+      "biomechanical": 0.5450484996464033,
+      "gait_engineered": 0.4549515003535966,
+      "lower_raw": 0.0
+    },
+    "top_30": [
+      {
+        "feature": "neuro_hip_mean_abs_vel_ratio",
+        "importance": 0.06298831117320544
+      },
+      {
+        "feature": "neuro_right_foot_to_knee_range_ratio",
+        "importance": 0.06057941490455716
+      },
+      {
+        "feature": "gait_ratio_ankle_to_knee_vel_x",
+        "importance": 0.058517267430076896
+      },
+      {
+        "feature": "neuro_left_foot_to_knee_range_ratio",
+        "importance": 0.04862573868535734
+      },
+      {
+        "feature": "gait_total_mean_abs_vel_ankle_x",
+        "importance": 0.037623298829185754
+      },
+      {
+        "feature": "neuro_left_knee_angle_proxy",
+        "importance": 0.0322577429170241
+      },
+      {
+        "feature": "gait_total_range_ankle_x",
+        "importance": 0.03211600079744749
+      },
+      {
+        "feature": "neuro_right_foot_to_knee_mean_abs_vel_ratio",
+        "importance": 0.022491837385911786
+      },
+      {
+        "feature": "gait_total_mean_abs_vel_hip_x",
+        "importance": 0.021995635968740723
+      },
+      {
+        "feature": "neuro_right_hip_mean_abs_vel_xy",
+        "importance": 0.018796641999010287
+      },
+      {
+        "feature": "neuro_right_knee_angle_proxy",
+        "importance": 0.01869745538255757
+      },
+      {
+        "feature": "gait_total_std_vel_hip_x",
+        "importance": 0.017340316647678627
+      },
+      {
+        "feature": "neuro_left_hip_mean_abs_vel_xy",
+        "importance": 0.017290883065731524
+      },
+      {
+        "feature": "gait_total_std_vel_ankle_x",
+        "importance": 0.016569780987824943
+      },
+      {
+        "feature": "neuro_left_foot_to_knee_mean_abs_vel_ratio",
+        "importance": 0.015423240598082963
+      },
+      {
+        "feature": "neuro_left_foot_ankle_y_offset",
+        "importance": 0.01525194265766562
+      },
+      {
+        "feature": "gait_total_mean_abs_vel_knee_x",
+        "importance": 0.011925130296757324
+      },
+      {
+        "feature": "neuro_right_foot_ankle_y_offset",
+        "importance": 0.01134390108331714
+      },
+      {
+        "feature": "gait_asym_mean_hip_y",
+        "importance": 0.009393179570054734
+      },
+      {
+        "feature": "gait_asym_std_knee_x",
+        "importance": 0.008487362069896757
+      },
+      {
+        "feature": "gait_total_std_vel_knee_x",
+        "importance": 0.008449870607566499
+      },
+      {
+        "feature": "gait_total_mean_abs_vel_ankle_z",
+        "importance": 0.00767725404976472
+      },
+      {
+        "feature": "neuro_right_foot_std_xy",
+        "importance": 0.007509073258711932
+      },
+      {
+        "feature": "neuro_knee_angle_asymmetry",
+        "importance": 0.007478951017637274
+      },
+      {
+        "feature": "gait_asym_mean_hip_x",
+        "importance": 0.007165069697335349
+      },
+      {
+        "feature": "gait_total_range_knee_x",
+        "importance": 0.006848299771240035
+      },
+      {
+        "feature": "gait_asym_range_knee_x",
+        "importance": 0.006777044583197843
+      },
+      {
+        "feature": "neuro_knee_std_ratio",
+        "importance": 0.006733376294118472
+      },
+      {
+        "feature": "gait_asym_mean_ankle_y",
+        "importance": 0.005959638259348589
+      },
+      {
+        "feature": "neuro_hip_range_ratio",
+        "importance": 0.005926743589828887
+      }
+    ],
+    "contains_visibility_features": false,
+    "contains_face_or_upper_body_raw_features": false
+  },
+  "model_path": "D:\\gait_dataset_project_structure\\06_models\\component_4_neuropathic\\component4_neuropathic_v10_normal_rasika_model.joblib",
+  "feature_list_path": "D:\\gait_dataset_project_structure\\06_models\\component_4_neuropathic\\component4_neuropathic_v10_normal_rasika_feature_list.json",
+  "aggregation_sweep_path": "D:\\gait_dataset_project_structure\\07_reports\\component_4_neuropathic\\component4_neuropathic_v10_normal_rasika_aggregation_sweep.csv"
+}

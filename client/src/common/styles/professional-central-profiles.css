@@ -1,0 +1,139 @@
+.professional-central-page {
+  padding-top: 32px;
+  padding-bottom: 56px;
+}
+
+.professional-central-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.85fr);
+  gap: 24px;
+  align-items: center;
+  padding: 28px;
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(240, 249, 255, 0.96), rgba(240, 253, 244, 0.92)),
+    radial-gradient(circle at top right, rgba(20, 184, 166, 0.18), transparent 34%);
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.1);
+}
+
+.professional-stat-tile,
+.professional-mini-tile {
+  height: 100%;
+  display: grid;
+  align-content: center;
+  gap: 6px;
+  padding: 16px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+
+.professional-stat-tile.warning {
+  border-color: #fed7aa;
+  background: #fff7ed;
+}
+
+.professional-stat-tile.danger {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.professional-stat-tile.info {
+  border-color: #bae6fd;
+  background: #f0f9ff;
+}
+
+.professional-stat-tile.success {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.professional-review-alert {
+  max-width: 640px;
+  border-radius: 8px !important;
+}
+
+.professional-review-filter {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 14px;
+  align-items: center;
+  max-width: 640px;
+  padding: 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(14, 165, 233, 0.22);
+}
+
+.professional-filter-card,
+.professional-profile-card {
+  border-radius: 8px !important;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08) !important;
+}
+
+.professional-profile-card {
+  height: 100%;
+}
+
+.professional-patient-avatar {
+  background: #0369a1 !important;
+  font-weight: 900 !important;
+}
+
+.professional-mini-tile svg {
+  color: #0369a1;
+}
+
+.professional-review-date {
+  color: #0369a1;
+  font-size: 0.88rem !important;
+  font-weight: 800 !important;
+  line-height: 1.35 !important;
+}
+
+.professional-mini-tile.reminder {
+  border-color: #bae6fd;
+  background: #f0f9ff;
+}
+
+.professional-mini-tile.reminder.overdue {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.professional-mini-tile.reminder.overdue svg {
+  color: #dc2626;
+}
+
+.professional-review-notice {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  border-radius: 8px;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+}
+
+.professional-review-notice.danger {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+@media (max-width: 900px) {
+  .professional-central-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .professional-review-notice {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .professional-review-filter {
+    grid-template-columns: 1fr;
+  }
+}
