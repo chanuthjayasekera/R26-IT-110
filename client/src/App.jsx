@@ -9,8 +9,10 @@ import ForgotPassword from "./common/pages/ForgotPassword.jsx";
 import ResetPassword from "./common/pages/ResetPassword.jsx";
 import PatientDashboard from "./common/pages/PatientDashboard.jsx";
 import ProfessionalDashboard from "./common/pages/ProfessionalDashboard.jsx";
+import ProfessionalCentralProfiles from "./common/pages/ProfessionalCentralProfiles.jsx";
 import AdminDashboard from "./common/pages/AdminDashboard.jsx";
 import Profile from "./common/pages/Profile.jsx";
+import CentralizedProfile from "./common/pages/CentralizedProfile.jsx";
 import Logout from "./common/pages/Logout.jsx";
 import NormalAbnormalDetection from "./normal-abnormal-detection-system/pages/NormalAbnormalDetection.jsx";
 import ScaKoaDetection from "./sca-koa-detection-system/pages/ScaKoaDetection.jsx";
@@ -33,6 +35,7 @@ export default function App() {
         <Route path="/logout" element={<Logout />} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/patient" element={<ProtectedRoute role="patient"><PatientDashboard /></ProtectedRoute>} />
+        <Route path="/patient/central-profile" element={<ProtectedRoute role="patient"><CentralizedProfile /></ProtectedRoute>} />
         <Route path="/patient/detection/normal-abnormal" element={<ProtectedRoute role="patient"><NormalAbnormalDetection /></ProtectedRoute>} />
         <Route path="/patient/results/normal-abnormal" element={<ProtectedRoute role="patient"><NormalAbnormalResults /></ProtectedRoute>} />
         <Route path="/patient/detection/sca-koa" element={<ProtectedRoute role="patient"><ScaKoaDetection /></ProtectedRoute>} />
@@ -43,6 +46,7 @@ export default function App() {
         <Route path="/patient/results/rehab-exercise" element={<ProtectedRoute role="patient"><RehabExerciseResults /></ProtectedRoute>} />
         <Route path="/patient/detection/rehab" element={<ProtectedRoute role="patient"><RehabExerciseDetection /></ProtectedRoute>} />
         <Route path="/professional" element={<ProtectedRoute role="professional"><ProfessionalDashboard /></ProtectedRoute>} />
+        <Route path="/professional/central-profiles" element={<ProtectedRoute role="professional"><ProfessionalCentralProfiles /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
