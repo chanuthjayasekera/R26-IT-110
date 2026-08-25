@@ -88,12 +88,138 @@ export async function migrate() {
       FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
     );
 
+    CREATE TABLE IF NOT EXISTS normal_abnormal_screenings (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      clinical_profile_id TEXT,
+      input_type TEXT NOT NULL,
+      file_name TEXT NOT NULL,
+      file_path TEXT NOT NULL,
+      csv_path TEXT,
+      direction TEXT,
+      fps_used REAL,
+      final_label INTEGER,
+      final_result TEXT,
+      model_suggested_label INTEGER,
+      model_suggested_result TEXT,
+      mean_prob_abnormal REAL,
+      confidence_percent REAL,
+      abnormal_ratio_threshold REAL,
+      screening_severity TEXT,
+      reliability_level TEXT,
+      reliability_reasons TEXT,
+      clinical_note TEXT,
+      raw_result_json TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY(clinical_profile_id) REFERENCES clinical_profiles(id) ON DELETE SET NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS sca_koa_screenings (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      clinical_profile_id TEXT,
+      model_key TEXT NOT NULL CHECK(model_key IN ('sca','koa')),
+      input_type TEXT NOT NULL,
+      file_name TEXT NOT NULL,
+      file_path TEXT NOT NULL,
+      csv_path TEXT,
+      direction TEXT,
+      fps_used REAL,
+      final_result TEXT,
+      detected INTEGER NOT NULL DEFAULT 0,
+      tendency INTEGER NOT NULL DEFAULT 0,
+      probability REAL,
+      max_probability REAL,
+      positive_window_count REAL,
+      positive_window_ratio REAL,
+      pattern_strength TEXT,
+      reliability_level TEXT,
+      reliability_reasons TEXT,
+      clinical_note TEXT,
+      instability_json TEXT,
+      raw_result_json TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY(clinical_profile_id) REFERENCES clinical_profiles(id) ON DELETE SET NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS sca_genetic_awareness (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      screening_id TEXT NOT NULL UNIQUE,
+      answers_json TEXT NOT NULL,
+      relatives_json TEXT NOT NULL,
+      suspected_json TEXT NOT NULL,
+      awareness_json TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY(screening_id) REFERENCES sca_koa_screenings(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS pd_neuropathy_screenings (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      clinical_profile_id TEXT,
+      model_key TEXT NOT NULL CHECK(model_key IN ('pd','neuropathy')),
+      input_type TEXT NOT NULL,
+      file_name TEXT NOT NULL,
+      file_path TEXT NOT NULL,
+      csv_path TEXT,
+      direction TEXT,
+      fps_used REAL,
+      final_result TEXT,
+      detected INTEGER NOT NULL DEFAULT 0,
+      tendency INTEGER NOT NULL DEFAULT 0,
+      probability REAL,
+      max_probability REAL,
+      positive_window_count REAL,
+      positive_window_ratio REAL,
+      reliability_level TEXT,
+      reliability_reasons TEXT,
+      clinical_note TEXT,
+      raw_result_json TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY(clinical_profile_id) REFERENCES clinical_profiles(id) ON DELETE SET NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS exercise_screenings (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      clinical_profile_id TEXT,
+      exercise_key TEXT NOT NULL CHECK(exercise_key IN ('gesture2','gesture3','gesture5')),
+      exercise_label TEXT NOT NULL,
+      file_name TEXT NOT NULL,
+      file_path TEXT NOT NULL,
+      annotated_path TEXT,
+      final_prediction TEXT,
+      final_label INTEGER,
+      quality_score REAL,
+      mean_correct_probability REAL,
+      decision_threshold REAL,
+      correct_ratio REAL,
+      incorrect_ratio REAL,
+      num_windows INTEGER,
+      valid_pose_frames INTEGER,
+      reliability_level TEXT,
+      reliability_reasons TEXT,
+      window_report_json TEXT NOT NULL,
+      raw_result_json TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY(clinical_profile_id) REFERENCES clinical_profiles(id) ON DELETE SET NULL
+    );
+
     CREATE TABLE IF NOT EXISTS central_profile_flags (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
       source_type TEXT NOT NULL,
       screening_id TEXT NOT NULL,
       snapshot_json TEXT NOT NULL,
+      risk_json TEXT,
+      rehab_json TEXT,
       flagged_at TEXT NOT NULL,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
@@ -103,6 +229,28 @@ export async function migrate() {
 
     CREATE INDEX IF NOT EXISTS idx_central_profile_flags_user
       ON central_profile_flags(user_id, updated_at DESC);
+
+    CREATE TABLE IF NOT EXISTS central_profile_guidance (
+      id TEXT PRIMARY KEY,
+      patient_user_id TEXT NOT NULL,
+      professional_user_id TEXT NOT NULL,
+      guidance_type TEXT NOT NULL CHECK(guidance_type IN ('risk','rehab')),
+      title TEXT NOT NULL,
+      source_type TEXT,
+      disease_focus TEXT,
+      priority TEXT,
+      payload_json TEXT NOT NULL,
+      attachment_name TEXT,
+      attachment_path TEXT,
+      patient_viewed_at TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      FOREIGN KEY(patient_user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY(professional_user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_central_profile_guidance_patient
+      ON central_profile_guidance(patient_user_id, guidance_type, created_at DESC);
   `);
 
   addColumn("users", "verification_status", "TEXT NOT NULL DEFAULT 'approved'");
@@ -111,6 +259,9 @@ export async function migrate() {
   addColumn("users", "license_proof_name", "TEXT");
   addColumn("users", "license_proof_data", "TEXT");
   addColumn("users", "profile_image", "TEXT");
+  addColumn("sca_koa_screenings", "instability_json", "TEXT");
+  addColumn("central_profile_flags", "risk_json", "TEXT");
+  addColumn("central_profile_flags", "rehab_json", "TEXT");
 
   db.prepare("DELETE FROM users WHERE email = ?").run("admin@gaitai.local");
 

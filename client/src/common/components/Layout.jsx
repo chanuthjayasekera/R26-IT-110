@@ -20,16 +20,16 @@ function navFor(user) {
     return [
       ["Normal vs Abnormal Detection", "/patient/detection/normal-abnormal"],
       ["SCA and KOA Detection", "/patient/detection/sca-koa"],
-      ["PD Detection", "/patient/detection/pd"],
-      ["Rehab Exercise Detection", "/patient/detection/rehab-exercise"],
+      ["PD & Neuropathy", "/patient/detection/pd"],
+      ["Exercise Quality", "/patient/detection/rehab-exercise"],
       ["Centralized Profile", "/patient/central-profile"]
     ];
   }
   if (user.role === "professional") {
     return [
-      ["Upload Risks", "/professional"],
-      ["Upload Recommendations", "/professional"],
-      ["Upload Rehabilitation", "/professional"],
+      ["Upload Risks", "/professional/central-profiles?section=risks"],
+      ["Upload Recommendations", "/professional/central-profiles?section=rehab"],
+      ["Upload Rehabilitation", "/professional/central-profiles?section=rehab"],
       ["Engage Patient Profiles", "/professional/central-profiles"]
     ];
   }
@@ -37,6 +37,35 @@ function navFor(user) {
     ["Patient Management", "/admin"],
     ["Dr Management", "/admin"]
   ];
+}
+
+const normalAbnormalLatestVideoKey = "normalAbnormalLatestVideoScreening";
+const normalAbnormalDismissedPreviewKey = "normalAbnormalManuallyDismissedPreviewIdV3";
+
+function scopedSessionKey(key, userId) {
+  return userId ? `${key}:${userId}` : key;
+}
+
+function stateForNavLink(to, user) {
+  if (to !== "/patient/detection/normal-abnormal" || typeof window === "undefined") return undefined;
+
+  try {
+    const value = window.sessionStorage.getItem(scopedSessionKey(normalAbnormalLatestVideoKey, user?.id));
+    const latestVideoScreening = value ? JSON.parse(value) : null;
+    const dismissedPreviewId = window.sessionStorage.getItem(scopedSessionKey(normalAbnormalDismissedPreviewKey, user?.id));
+
+    if (
+      latestVideoScreening?.hasVideoPreview &&
+      latestVideoScreening?.videoUrl &&
+      latestVideoScreening.id !== dismissedPreviewId
+    ) {
+      return { latestVideoScreening, showLatestVideo: true };
+    }
+  } catch {
+    return undefined;
+  }
+
+  return undefined;
 }
 
 export default function Layout({ children }) {
@@ -67,7 +96,7 @@ export default function Layout({ children }) {
                 <>
                   <Stack direction="row" spacing={0.5} className="desktop-nav">
                     {navFor(user).map(([label, to]) => (
-                      <Button key={label} component={Link} to={to} size="small">{label}</Button>
+                      <Button key={label} component={Link} to={to} state={stateForNavLink(to, user)} size="small">{label}</Button>
                     ))}
                   </Stack>
                   <IconButton onClick={(event) => setAnchor(event.currentTarget)} className="profile-trigger">
@@ -118,7 +147,7 @@ export default function Layout({ children }) {
             <Box>
               <Typography variant="overline" fontWeight={900}>Patient Modules</Typography>
               <Typography variant="body2">Normal vs abnormal detection</Typography>
-              <Typography variant="body2">SCA, KOA, and PD analysis</Typography>
+              <Typography variant="body2">SCA, KOA, PD, and neuropathy analysis</Typography>
               <Typography variant="body2">Rehab & recommendation support</Typography>
             </Box>
             <Box>

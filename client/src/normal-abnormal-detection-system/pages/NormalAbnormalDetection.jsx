@@ -399,7 +399,6 @@ export default function NormalAbnormalDetection() {
     }
   }
 
-
   return (
     <Container maxWidth="xl" className="normal-detection-page">
       <Grid2 container spacing={3}>
@@ -667,4 +666,3 @@ export default function NormalAbnormalDetection() {
     </Container>
   );
 }
-//*normal abnoraml detection  

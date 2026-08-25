@@ -1,0 +1,651 @@
+.central-profile-page {
+  padding-top: 32px;
+  padding-bottom: 56px;
+}
+
+.central-side-nav {
+  position: sticky;
+  top: 96px;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid rgba(14, 165, 233, 0.22);
+  box-shadow: 0 16px 42px rgba(15, 23, 42, 0.09);
+}
+
+.central-side-nav.collapsed {
+  justify-items: center;
+  padding: 12px 8px;
+}
+
+.central-side-nav .MuiButton-root {
+  justify-content: flex-start;
+  min-height: 46px;
+  border-radius: 8px;
+  text-transform: none;
+  font-weight: 850;
+}
+
+.central-side-nav.collapsed .MuiButton-root {
+  justify-content: center;
+  min-width: 48px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.central-side-nav.collapsed .MuiButton-startIcon {
+  margin: 0;
+}
+
+.central-nav-button-label {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.central-nav-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px 14px;
+  border-bottom: 1px solid #e2e8f0;
+  color: #0369a1;
+}
+
+.central-side-nav.collapsed .central-nav-head {
+  justify-content: center;
+  padding: 8px 0 12px;
+}
+
+.central-nav-collapse {
+  margin-left: auto !important;
+}
+
+.central-side-nav.collapsed .central-nav-collapse {
+  margin-left: 0 !important;
+}
+
+.central-nav-head svg {
+  font-size: 32px;
+}
+
+.central-profile-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 24px;
+  align-items: stretch;
+  padding: 28px;
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(240, 249, 255, 0.96), rgba(240, 253, 244, 0.94)),
+    radial-gradient(circle at top right, rgba(14, 165, 233, 0.18), transparent 35%);
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.1);
+}
+
+.central-progress-panel {
+  display: grid;
+  align-content: center;
+  gap: 10px;
+  padding: 18px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.central-section-card {
+  border-radius: 8px !important;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08) !important;
+}
+
+.central-section-card {
+  overflow: visible !important;
+}
+
+.central-section-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 8px;
+  color: #0369a1;
+  background: #e0f2fe;
+}
+
+.central-section-icon svg {
+  font-size: 28px;
+}
+
+.central-empty-slot {
+  min-height: 170px;
+  display: grid;
+  align-content: center;
+  gap: 6px;
+  padding: 18px;
+  border-radius: 8px;
+  border: 1px dashed rgba(14, 165, 233, 0.46);
+  background: #f8fafc;
+}
+
+.central-future-panel {
+  padding: 16px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+
+.central-future-panel {
+  min-height: 190px;
+  display: grid;
+  align-content: center;
+  gap: 8px;
+}
+
+.central-future-panel svg {
+  color: #0369a1;
+  font-size: 34px;
+}
+
+.central-remove-bar {
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+}
+
+.central-timeline-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  padding: 15px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.central-timeline-item.reminder {
+  background: #f0f9ff;
+  border-color: #bae6fd;
+}
+
+.central-timeline-item.reminder.overdue {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.central-doctor-form,
+.central-shared-review-card,
+.central-guidance-card {
+  border-radius: 8px !important;
+  border: 1px solid #dbeafe;
+  box-shadow: none !important;
+}
+
+.central-doctor-form {
+  background:
+    linear-gradient(135deg, rgba(248, 250, 252, 0.98), rgba(240, 249, 255, 0.94)) !important;
+}
+
+.central-shared-review-card {
+  background:
+    linear-gradient(135deg, rgba(239, 246, 255, 0.98), rgba(236, 253, 245, 0.92)) !important;
+  border-color: rgba(14, 165, 233, 0.32) !important;
+}
+
+.central-doctor-form-head {
+  padding: 14px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+
+.central-guidance-card.unread {
+  border-color: #fca5a5;
+  background:
+    linear-gradient(135deg, rgba(255, 247, 247, 0.98), rgba(255, 255, 255, 0.96));
+}
+
+.central-guidance-card.patient-view {
+  overflow: hidden;
+  border: 1px solid rgba(14, 165, 233, 0.22) !important;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.1) !important;
+}
+
+.central-guidance-card.patient-view.risk {
+  background:
+    linear-gradient(135deg, rgba(255, 247, 237, 0.98), rgba(255, 255, 255, 0.96) 42%),
+    linear-gradient(90deg, rgba(251, 146, 60, 0.16), transparent 52%);
+  border-color: rgba(251, 146, 60, 0.38) !important;
+}
+
+.central-guidance-card.patient-view.rehab {
+  background:
+    linear-gradient(135deg, rgba(240, 253, 244, 0.98), rgba(255, 255, 255, 0.96) 42%),
+    linear-gradient(90deg, rgba(45, 212, 191, 0.16), transparent 52%);
+  border-color: rgba(34, 197, 94, 0.34) !important;
+}
+
+.central-guidance-card-content {
+  padding: 22px !important;
+}
+
+.central-guidance-patient-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: start;
+}
+
+.central-guidance-patient-title {
+  font-size: 2rem;
+  line-height: 1.14;
+  font-weight: 950;
+  color: #0f172a;
+}
+
+.central-guidance-patient-meta {
+  color: #475569;
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.central-guidance-patient-tags .MuiChip-root {
+  min-height: 30px;
+  font-size: 0.92rem;
+  font-weight: 850;
+}
+
+.central-guidance-patient-actions {
+  justify-content: flex-end;
+}
+
+.central-guidance-patient-actions .MuiButton-root {
+  min-height: 46px;
+  border-radius: 8px;
+  text-transform: none;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.central-guidance-summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  padding: 18px;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: #ffffff;
+}
+
+.central-guidance-summary.risk {
+  border-color: rgba(245, 158, 11, 0.34);
+  background:
+    linear-gradient(135deg, #fff7ed, #ffffff);
+}
+
+.central-guidance-summary.rehab {
+  border-color: rgba(34, 197, 94, 0.28);
+  background:
+    linear-gradient(135deg, #f0fdf4, #ffffff);
+}
+
+.central-guidance-summary.patient {
+  padding: 22px;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.54);
+}
+
+.central-guidance-summary.patient.risk {
+  background:
+    linear-gradient(135deg, rgba(255, 237, 213, 0.95), rgba(255, 255, 255, 0.9));
+}
+
+.central-guidance-summary.patient.rehab {
+  background:
+    linear-gradient(135deg, rgba(220, 252, 231, 0.95), rgba(255, 255, 255, 0.9));
+}
+
+.central-guidance-summary-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  color: #0369a1;
+}
+
+.central-guidance-summary-icon svg {
+  font-size: 30px;
+}
+
+.central-guidance-summary.patient .central-guidance-summary-icon {
+  width: 62px;
+  height: 62px;
+}
+
+.central-guidance-summary.patient .central-guidance-summary-icon svg {
+  font-size: 38px;
+}
+
+.central-guidance-summary.risk .central-guidance-summary-icon {
+  color: #b45309;
+}
+
+.central-guidance-summary.rehab .central-guidance-summary-icon {
+  color: #15803d;
+}
+
+.central-guidance-summary-body {
+  display: grid;
+  gap: 8px;
+}
+
+.central-guidance-summary.patient .MuiTypography-h6 {
+  font-size: 1.45rem;
+  line-height: 1.22;
+}
+
+.central-guidance-summary-focus,
+.central-guidance-summary-action,
+.central-guidance-summary-review {
+  color: #334155;
+  line-height: 1.55;
+}
+
+.central-guidance-summary.patient .central-guidance-summary-focus,
+.central-guidance-summary.patient .central-guidance-summary-action,
+.central-guidance-summary.patient .central-guidance-summary-review {
+  font-size: 1.08rem;
+}
+
+.central-guidance-summary-action {
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.central-guidance-summary-review {
+  font-weight: 850;
+  color: #0369a1;
+}
+
+.central-guidance-field {
+  height: 100%;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+
+.central-guidance-field.important {
+  border-color: rgba(14, 165, 233, 0.28);
+  background: #f8fcff;
+}
+
+.central-guidance-field.patient {
+  min-height: 154px;
+  padding: 20px;
+  border-color: rgba(148, 163, 184, 0.2);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.98));
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
+}
+
+.central-guidance-field.patient.risk {
+  border-color: rgba(251, 146, 60, 0.28);
+}
+
+.central-guidance-field.patient.rehab {
+  border-color: rgba(20, 184, 166, 0.26);
+}
+
+.central-guidance-field.patient.important {
+  background:
+    linear-gradient(135deg, rgba(240, 249, 255, 0.98), rgba(255, 255, 255, 0.98));
+  border-color: rgba(14, 165, 233, 0.34);
+}
+
+.central-guidance-field.important svg {
+  color: #0284c7;
+}
+
+.central-guidance-field-head {
+  color: #0f172a;
+}
+
+.central-guidance-field.patient .central-guidance-field-head {
+  gap: 10px;
+}
+
+.central-guidance-step-number {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 8px;
+  color: #ffffff;
+  background: #0284c7;
+  font-weight: 950;
+  font-size: 0.95rem;
+}
+
+.central-guidance-field.patient.risk .central-guidance-step-number {
+  background: #ea580c;
+}
+
+.central-guidance-field.patient.rehab .central-guidance-step-number {
+  background: #0f766e;
+}
+
+.central-guidance-field.patient .central-guidance-field-head .MuiTypography-root {
+  font-size: 1.22rem;
+  line-height: 1.25;
+}
+
+.central-guidance-field-help {
+  color: #64748b;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.central-guidance-field.patient .central-guidance-field-help {
+  font-size: 1rem;
+}
+
+.central-guidance-chip-list .MuiChip-root {
+  height: auto;
+  min-height: 30px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  font-weight: 750;
+}
+
+.central-guidance-field.patient .central-guidance-chip-list .MuiChip-root {
+  min-height: 36px;
+  border-radius: 8px;
+  background: #eef2ff;
+  color: #312e81;
+  font-size: 0.98rem;
+  font-weight: 900;
+}
+
+.central-guidance-field.patient.risk .central-guidance-chip-list .MuiChip-root {
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+.central-guidance-field.patient.rehab .central-guidance-chip-list .MuiChip-root {
+  background: #ccfbf1;
+  color: #115e59;
+}
+
+.central-guidance-chip-list .MuiChip-label {
+  white-space: normal;
+}
+
+.central-guidance-patient-text {
+  font-size: 1.15rem;
+  line-height: 1.68;
+  color: #0f172a;
+}
+
+.central-guidance-simple {
+  padding: 18px;
+  border-radius: 8px;
+  border: 1px solid rgba(14, 165, 233, 0.22);
+  background: linear-gradient(135deg, #f0f9ff, #ffffff);
+}
+
+.central-guidance-simple.risk {
+  border-color: rgba(248, 113, 113, 0.34);
+  background: linear-gradient(135deg, #fff7ed, #ffffff);
+}
+
+.central-guidance-simple.rehab {
+  border-color: rgba(34, 197, 94, 0.28);
+  background: linear-gradient(135deg, #f0fdf4, #ffffff);
+}
+
+.central-guidance-simple-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0369a1;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+}
+
+.central-guidance-simple.risk .central-guidance-simple-icon {
+  color: #b45309;
+}
+
+.central-guidance-simple.rehab .central-guidance-simple-icon {
+  color: #15803d;
+}
+
+.central-guidance-simple-text,
+.central-guidance-simple-action {
+  font-size: 1.08rem;
+  line-height: 1.65;
+  color: #334155;
+}
+
+.central-guidance-simple-action {
+  margin-top: 8px !important;
+  color: #0f172a;
+}
+
+.central-guidance-mark-button {
+  min-width: 118px;
+}
+
+.central-select-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.central-guidance-video {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.central-guidance-video video {
+  width: 100%;
+  max-height: 420px;
+  border-radius: 8px;
+  background: #020617;
+}
+
+.central-guidance-document,
+.central-attachment-uploader {
+  padding: 14px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #dbeafe;
+}
+
+.central-guidance-document {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+}
+
+.central-guidance-document svg {
+  color: #0284c7;
+  font-size: 32px;
+}
+
+.central-attachment-uploader {
+  display: grid;
+  gap: 6px;
+}
+
+@media (max-width: 900px) {
+  .central-side-nav {
+    position: static;
+  }
+
+  .central-profile-hero {
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
+
+  .central-timeline-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .central-guidance-document {
+    grid-template-columns: 1fr;
+    align-items: flex-start;
+  }
+
+  .central-guidance-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .central-guidance-patient-top {
+    grid-template-columns: 1fr;
+  }
+
+  .central-guidance-patient-title {
+    font-size: 1.55rem;
+  }
+
+  .central-guidance-patient-actions {
+    justify-content: flex-start;
+  }
+
+  .central-guidance-patient-actions .MuiButton-root {
+    width: 100%;
+  }
+}
