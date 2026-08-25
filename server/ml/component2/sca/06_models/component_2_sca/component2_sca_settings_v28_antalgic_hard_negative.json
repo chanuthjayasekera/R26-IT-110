@@ -1,0 +1,177 @@
+{
+  "model_version": "SCA V28 antalgic hard-negative model",
+  "best_model_name": "histgradientboosting_sca_v28_antalgic_hard_negative",
+  "dataset_path": "D:\\gait_dataset_project_structure\\05_preprocessed_windows\\component_2_sca\\sca_v28_antalgic_hard_negative_window_dataset.csv",
+  "model_path": "D:\\gait_dataset_project_structure\\06_models\\component_2_sca\\component2_sca_model_v28_antalgic_hard_negative_holdout_eval.joblib",
+  "feature_list_path": "D:\\gait_dataset_project_structure\\06_models\\component_2_sca\\component2_sca_feature_list_v28_antalgic_hard_negative.json",
+  "feature_filter": "strict_inference_safe_only",
+  "feature_count": 1065,
+  "split_type": "subject-wise holdout, no deployment refit",
+  "forced_train_subject_ids": [
+    "antalgic_P002",
+    "antalgic_P004",
+    "antalgic_P006",
+    "antalgic_P007",
+    "antalgic_P010",
+    "antalgic_P012",
+    "antalgic_P013",
+    "antalgic_P014",
+    "antalgic_P015",
+    "antalgic_P016",
+    "antalgic_P017",
+    "antalgic_P018",
+    "antalgic_P019",
+    "antalgic_P020",
+    "antalgic_P023",
+    "antalgic_P026",
+    "antalgic_P029",
+    "antalgic_P035",
+    "antalgic_P037",
+    "antalgic_P038",
+    "antalgic_P039",
+    "antalgic_P040",
+    "antalgic_P041",
+    "antalgic_P043",
+    "antalgic_P044",
+    "antalgic_P045",
+    "antalgic_P046",
+    "antalgic_P047",
+    "antalgic_P048",
+    "antalgic_P050",
+    "koa_clinical_R2Lkoa2",
+    "normal_P009",
+    "normal_P012",
+    "normal_P013",
+    "normal_P014",
+    "normal_P020",
+    "normal_P023",
+    "normal_P027",
+    "normal_P028",
+    "normal_P029",
+    "normal_P031",
+    "normal_P034",
+    "normal_P035",
+    "normal_P036",
+    "normal_P041",
+    "normal_P042",
+    "normal_P044",
+    "normal_P046",
+    "normal_P050",
+    "normal_P052",
+    "normal_hard_amalka_codex_retest",
+    "normal_ms2022_sideview_actual",
+    "normal_ms2022_sideview_variants",
+    "sca_P006",
+    "sca_P041",
+    "sca_drunk_gait_r_to_l_sca",
+    "sca_drunk_gait_scaaa",
+    "sca_drunk_gait_scaaaaaa",
+    "sca_drunk_gait_scanew",
+    "sca_v23_final_instability_whatsapp_161928_asymmetric_step_mild",
+    "sca_v23_final_instability_whatsapp_161928_asymmetric_step_strong",
+    "sca_v23_final_instability_whatsapp_161928_lateral_stumble_left",
+    "sca_v23_final_instability_whatsapp_161928_lateral_stumble_right",
+    "sca_v23_final_instability_whatsapp_161928_smooth_jitter_end_weighted",
+    "sca_v23_final_instability_whatsapp_161928_smooth_jitter_full_clip",
+    "sca_v23_final_instability_whatsapp_161928_timewarp_fast_instability",
+    "sca_v23_final_instability_whatsapp_161928_timewarp_slow_instability"
+  ],
+  "selected_window_threshold": 0.15,
+  "recommended_video_setting": {
+    "prob_threshold": 0.45,
+    "ratio_threshold": 0.25,
+    "count_threshold": 4,
+    "max_probability_threshold": 0.2,
+    "min_total_windows": 5
+  },
+  "deployment_video_setting": {
+    "prob_threshold": 0.45,
+    "ratio_threshold": 0.25,
+    "count_threshold": 4,
+    "max_probability_threshold": 0.2,
+    "mean_probability_threshold": 0.42,
+    "min_total_windows": 5,
+    "short_clip_rescue": {
+      "min_total_windows": 4,
+      "max_total_windows": 7,
+      "min_positive_ratio": 1.0,
+      "min_mean_probability": 0.8,
+      "min_max_probability": 0.9,
+      "min_top3_mean_probability": 0.9
+    },
+    "limited_clip_repeated_rescue": {
+      "min_total_windows": 5,
+      "max_total_windows": 8,
+      "min_positive_count": 3,
+      "min_positive_ratio": 0.35,
+      "min_mean_probability": 0.35,
+      "min_max_probability": 0.8,
+      "min_top3_mean_probability": 0.65
+    },
+    "audit_summary": {
+      "v28_active_antalgic_false_positives": "0 / 100",
+      "v28_labeled_non_sca_false_positives": "0 in audited labeled training-safe folders",
+      "v28_labeled_sca_detected": "110 / 112 with conservative deployment rule"
+    }
+  },
+  "window_metrics": {
+    "accuracy": 0.8893492145693078,
+    "precision": 0.8739304050199658,
+    "recall": 0.9390131780570028,
+    "f1": 0.9053035898951101,
+    "tn": 2088,
+    "fp": 442,
+    "fn": 199,
+    "tp": 3064,
+    "confusion_matrix": [
+      [
+        2088,
+        442
+      ],
+      [
+        199,
+        3064
+      ]
+    ]
+  },
+  "video_metrics": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "tn": 176,
+    "fp": 0,
+    "fn": 0,
+    "tp": 34,
+    "confusion_matrix": [
+      [
+        176,
+        0
+      ],
+      [
+        0,
+        34
+      ]
+    ]
+  },
+  "baseline_active_v11_video_metrics": {
+    "accuracy": 0.9166666666666666,
+    "precision": 0.6756756756756757,
+    "recall": 0.8064516129032258,
+    "f1": 0.7352941176470589,
+    "tn": 173,
+    "fp": 12,
+    "fn": 6,
+    "tp": 25
+  },
+  "baseline_v16_clean_video_metrics": {
+    "accuracy": 0.918552036199095,
+    "precision": 0.825,
+    "recall": 0.75,
+    "f1": 0.7857142857142857,
+    "tn": 170,
+    "fp": 7,
+    "fn": 11,
+    "tp": 33
+  }
+}

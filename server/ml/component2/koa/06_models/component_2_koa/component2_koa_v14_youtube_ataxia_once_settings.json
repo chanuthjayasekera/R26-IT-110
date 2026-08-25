@@ -1,0 +1,340 @@
+{
+  "component": "Component 2B",
+  "detector": "KOA specialist detector",
+  "model_version": "KOA V14 youtube-ataxia once non-KOA non-refit holdout-evaluation HistGradientBoosting",
+  "dataset_path": "D:\\gait_dataset_project_structure\\05_preprocessed_windows\\component_1\\master_component1_windows_v14_koa_youtube_ataxia_once.csv",
+  "model_path": "D:\\gait_dataset_project_structure\\06_models\\component_2_koa\\component2_koa_v14_youtube_ataxia_once_holdout_eval_model.joblib",
+  "feature_list_path": "D:\\gait_dataset_project_structure\\06_models\\component_2_koa\\component2_koa_v14_youtube_ataxia_once_feature_list.json",
+  "settings_path": "D:\\gait_dataset_project_structure\\06_models\\component_2_koa\\component2_koa_v14_youtube_ataxia_once_settings.json",
+  "feature_set": "lower_motion",
+  "feature_count": 271,
+  "split_type": "subject-wise OOF threshold tuning plus untouched subject holdout",
+  "deployment_refit_on_all_data": false,
+  "positive_class": "koa",
+  "negative_classes": [
+    "antalgic",
+    "diplegia",
+    "hemiplegia",
+    "neuropathic",
+    "normal",
+    "pd",
+    "sca"
+  ],
+  "excluded_class": null,
+  "decision_rule": "pattern_aggregation_mean_count_ratio_max",
+  "final_threshold": 0.18,
+  "recommended_video_setting": {
+    "mean_threshold": 0.18,
+    "window_threshold": 0.34,
+    "ratio_threshold": 0.1,
+    "count_threshold": 5,
+    "max_threshold": 0.6,
+    "min_total_windows": 5
+  },
+  "pattern_search_settings": {
+    "mean_thresholds": [
+      0.12,
+      0.14,
+      0.16,
+      0.18,
+      0.2,
+      0.22,
+      0.24,
+      0.26,
+      0.28,
+      0.3,
+      0.34
+    ],
+    "window_thresholds": [
+      0.16,
+      0.18,
+      0.2,
+      0.22,
+      0.24,
+      0.26,
+      0.28,
+      0.3,
+      0.34
+    ],
+    "ratio_thresholds": [
+      0.1,
+      0.15,
+      0.2,
+      0.25,
+      0.3,
+      0.35,
+      0.4
+    ],
+    "count_thresholds": [
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "max_thresholds": [
+      0.24,
+      0.28,
+      0.32,
+      0.36,
+      0.4,
+      0.45,
+      0.5,
+      0.6
+    ],
+    "min_total_windows": [
+      5
+    ],
+    "target_video_recall": 0.85,
+    "target_subject_recall": 0.85,
+    "target_video_precision": 0.75,
+    "target_subject_precision": 0.72
+  },
+  "final_oof_video_metrics": {
+    "accuracy": 0.9246753246753247,
+    "precision": 0.6907894736842105,
+    "recall": 0.9051724137931034,
+    "f1": 0.7835820895522388,
+    "tn": 607,
+    "fp": 47,
+    "fn": 11,
+    "tp": 105,
+    "confusion_matrix": [
+      [
+        607,
+        47
+      ],
+      [
+        11,
+        105
+      ]
+    ]
+  },
+  "final_oof_subject_metrics": {
+    "accuracy": 0.8915343915343915,
+    "precision": 0.5308641975308642,
+    "recall": 0.9347826086956522,
+    "f1": 0.6771653543307087,
+    "tn": 294,
+    "fp": 38,
+    "fn": 3,
+    "tp": 43,
+    "confusion_matrix": [
+      [
+        294,
+        38
+      ],
+      [
+        3,
+        43
+      ]
+    ]
+  },
+  "untouched_test_video_metrics": {
+    "accuracy": 0.9878787878787879,
+    "precision": 1.0,
+    "recall": 0.9166666666666666,
+    "f1": 0.9565217391304348,
+    "tn": 141,
+    "fp": 0,
+    "fn": 2,
+    "tp": 22,
+    "confusion_matrix": [
+      [
+        141,
+        0
+      ],
+      [
+        2,
+        22
+      ]
+    ]
+  },
+  "untouched_test_subject_metrics": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "tn": 71,
+    "fp": 0,
+    "fn": 0,
+    "tp": 12,
+    "confusion_matrix": [
+      [
+        71,
+        0
+      ],
+      [
+        0,
+        12
+      ]
+    ]
+  },
+  "untouched_test_per_class_video_metrics": {
+    "antalgic": {
+      "accuracy": 1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tn": 18,
+      "fp": 0,
+      "fn": 0,
+      "tp": 0,
+      "confusion_matrix": [
+        [
+          18,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    "diplegia": {
+      "accuracy": 1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tn": 20,
+      "fp": 0,
+      "fn": 0,
+      "tp": 0,
+      "confusion_matrix": [
+        [
+          20,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    "hemiplegia": {
+      "accuracy": 1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tn": 20,
+      "fp": 0,
+      "fn": 0,
+      "tp": 0,
+      "confusion_matrix": [
+        [
+          20,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    "koa": {
+      "accuracy": 0.9166666666666666,
+      "precision": 1.0,
+      "recall": 0.9166666666666666,
+      "f1": 0.9565217391304348,
+      "tn": 0,
+      "fp": 0,
+      "fn": 2,
+      "tp": 22,
+      "confusion_matrix": [
+        [
+          0,
+          0
+        ],
+        [
+          2,
+          22
+        ]
+      ]
+    },
+    "neuropathic": {
+      "accuracy": 1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tn": 20,
+      "fp": 0,
+      "fn": 0,
+      "tp": 0,
+      "confusion_matrix": [
+        [
+          20,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    "normal": {
+      "accuracy": 1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tn": 24,
+      "fp": 0,
+      "fn": 0,
+      "tp": 0,
+      "confusion_matrix": [
+        [
+          24,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    "pd": {
+      "accuracy": 1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tn": 23,
+      "fp": 0,
+      "fn": 0,
+      "tp": 0,
+      "confusion_matrix": [
+        [
+          23,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    "sca": {
+      "accuracy": 1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tn": 16,
+      "fp": 0,
+      "fn": 0,
+      "tp": 0,
+      "confusion_matrix": [
+        [
+          16,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    }
+  },
+  "deployment_setting_note": "V14 model deployed with the original V13 aggregation rule to preserve KOA holdout recall while keeping youtube ataxia below the max-probability gate.",
+  "untouched_test_video_report_path": "D:\\gait_dataset_project_structure\\07_reports\\component_2_koa\\component2_koa_v14_youtube_ataxia_once_v13_aggregation_video_report.csv",
+  "untouched_test_false_positive_path": "D:\\gait_dataset_project_structure\\07_reports\\component_2_koa\\component2_koa_v14_youtube_ataxia_once_v13_aggregation_false_positive_videos.csv",
+  "untouched_test_false_negative_path": "D:\\gait_dataset_project_structure\\07_reports\\component_2_koa\\component2_koa_v14_youtube_ataxia_once_v13_aggregation_false_negative_videos.csv",
+  "untouched_test_subject_report_path": "D:\\gait_dataset_project_structure\\07_reports\\component_2_koa\\component2_koa_v14_youtube_ataxia_once_v13_aggregation_subject_report.csv"
+}

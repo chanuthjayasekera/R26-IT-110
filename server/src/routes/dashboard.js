@@ -10,14 +10,26 @@ dashboardRouter.get("/patient", requireAuth, requireRole("patient"), (req, res) 
     modules: [
       { title: "Normal vs Abnormal Detection", status: "Ready", description: "Upload gait videos for first-stage screening, biometrics, and severity estimation." },
       { title: "SCA and KOA Detection", status: "Ready", description: "Review Spinocerebellar Ataxia, Knee Osteoarthritis, and joint instability analysis." },
-      { title: "Parkinson Detection", status: "Ready", description: "Access Parkinson prediction, severity scoring, and central profile updates." },
-      { title: "Rehab Exercise Detection", status: "Ready", description: "Upload rehabilitation exercise videos for pose correctness checks and clinician-maintained recommendations." }
+      { title: "PD & Neuropathy Detection", status: "Ready", description: "Access PD and neuropathy gait screening with comparison profile views." },
+      { title: "Exercise Quality Analysis", status: "Ready", description: "Upload rehabilitation exercise videos for pose correctness checks, timed posture windows, and report export." }
     ]
   });
 });
 
 dashboardRouter.get("/professional", requireAuth, requireRole("professional"), requireVerifiedProfessional, (req, res) => {
-  const patients = db.prepare("SELECT id, full_name, email, created_at FROM users WHERE role = 'patient' ORDER BY created_at DESC LIMIT 8").all();
+  const patients = db.prepare(`
+    SELECT u.id, u.full_name, u.email, MAX(cpf.updated_at) AS created_at, COUNT(DISTINCT cpf.source_type) AS completed_slots
+    FROM users u
+    JOIN central_profile_flags cpf ON cpf.user_id = u.id
+    WHERE u.role = 'patient'
+      AND cpf.source_type IN (
+        'normal_abnormal', 'sca', 'koa', 'pd', 'neuropathy',
+        'exercise_gesture2', 'exercise_gesture3', 'exercise_gesture5'
+      )
+    GROUP BY u.id
+    ORDER BY MAX(cpf.updated_at) DESC
+    LIMIT 8
+  `).all();
   res.json({
     message: "Medical professional dashboard loaded.",
     modules: [

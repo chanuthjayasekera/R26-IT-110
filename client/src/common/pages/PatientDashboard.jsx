@@ -16,8 +16,10 @@ const icons = [<DirectionsWalkIcon />, <AirlineSeatLegroomNormalIcon />, <Psycho
 const moduleRoutes = {
   "Normal vs Abnormal Detection": "/patient/detection/normal-abnormal",
   "SCA and KOA Detection": "/patient/detection/sca-koa",
-  "PD Detection": "/patient/detection/pd",
-  "Rehab Exercise Detection": "/patient/detection/rehab-exercise"
+  "PD & Neuropathy Detection": "/patient/detection/pd",
+  "Parkinson Detection": "/patient/detection/pd",
+  "Rehab Exercise Detection": "/patient/detection/rehab-exercise",
+  "Exercise Quality Analysis": "/patient/detection/rehab-exercise"
 };
 
 export default function PatientDashboard() {
@@ -35,7 +37,7 @@ export default function PatientDashboard() {
           <Stack spacing={1}>
             <Typography variant="overline" color="primary" fontWeight={900}>Patient home</Typography>
             <Typography variant="h3">Hello {user?.fullName}, your gait analysis workspace is ready.</Typography>
-            <Typography color="text.secondary">Start with normal vs abnormal screening, then continue to SCA/KOA, PD detection, and rehabilitation exercise detection.</Typography>
+            <Typography color="text.secondary">Start with normal vs abnormal screening, then continue to SCA/KOA, PD and neuropathy detection, and exercise quality analysis.</Typography>
           </Stack>
          <img src={gaitImage} alt="Patient gait rehabilitation support" />
         </Box>
