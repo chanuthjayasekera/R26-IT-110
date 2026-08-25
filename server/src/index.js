@@ -8,6 +8,10 @@ import { migrate } from "./db.js";
 import { authRouter } from "./routes/auth.js";
 import { dashboardRouter } from "./routes/dashboard.js";
 import { centralProfileRouter } from "./routes/centralProfile.js";
+import { exerciseDetectionRouter } from "./routes/exerciseDetection.js";
+import { normalAbnormalRouter } from "./routes/normalAbnormal.js";
+import { pdNeuropathyRouter } from "./routes/pdNeuropathy.js";
+import { scaKoaRouter } from "./routes/scaKoa.js";
 
 await migrate();
 
@@ -23,6 +27,10 @@ app.get("/api/health", (req, res) => res.json({ ok: true, service: "gait-auth-ap
 app.use("/api/auth", authRouter);
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api/central-profile", centralProfileRouter);
+app.use("/api/normal-abnormal", normalAbnormalRouter);
+app.use("/api/sca-koa", scaKoaRouter);
+app.use("/api/pd-neuropathy", pdNeuropathyRouter);
+app.use("/api/exercise-detection", exerciseDetectionRouter);
 
 app.use((req, res) => res.status(404).json({ message: "Route not found." }));
 
