@@ -146,14 +146,14 @@ function safeUnlinkStoredFile(storedPath) {
   fs.promises.unlink(absolutePath).catch(() => {});
 }
 
-normalAbnormalRouter.get("/clinical-profile", requireAuth, requireRole("patient"), (req, res) => {
-  const profile = db.prepare("SELECT * FROM clinical_profiles WHERE user_id = ?").get(req.user.id);
-  const screenings = db.prepare(`
+normalAbnormalRouter.get("/clinical-profile", requireAuth, requireRole("patient"), async (req, res) => {
+  const profile = await db.get("SELECT * FROM clinical_profiles WHERE user_id = ?", req.user.id);
+  const screenings = await db.all(`
     SELECT * FROM normal_abnormal_screenings
     WHERE user_id = ?
     ORDER BY created_at DESC
     LIMIT 20
-  `).all(req.user.id);
+  `, req.user.id);
 
   res.json({
     profile: publicClinicalProfile(profile, screenings),
@@ -161,11 +161,11 @@ normalAbnormalRouter.get("/clinical-profile", requireAuth, requireRole("patient"
   });
 });
 
-normalAbnormalRouter.get("/screenings/:id/file", requireAuth, requireRole("patient"), (req, res) => {
-  const screening = db.prepare(`
+normalAbnormalRouter.get("/screenings/:id/file", requireAuth, requireRole("patient"), async (req, res) => {
+  const screening = await db.get(`
     SELECT * FROM normal_abnormal_screenings
     WHERE id = ? AND user_id = ? AND input_type = 'video'
-  `).get(req.params.id, req.user.id);
+  `, req.params.id, req.user.id);
 
   if (!screening) return res.status(404).json({ message: "Screening video not found." });
 
@@ -181,40 +181,40 @@ normalAbnormalRouter.get("/screenings/:id/file", requireAuth, requireRole("patie
   res.sendFile(absolutePath);
 });
 
-normalAbnormalRouter.get("/screenings/:id", requireAuth, requireRole("patient"), (req, res) => {
-  const screening = db.prepare(`
+normalAbnormalRouter.get("/screenings/:id", requireAuth, requireRole("patient"), async (req, res) => {
+  const screening = await db.get(`
     SELECT * FROM normal_abnormal_screenings
     WHERE id = ? AND user_id = ?
-  `).get(req.params.id, req.user.id);
+  `, req.params.id, req.user.id);
 
   if (!screening) return res.status(404).json({ message: "Screening record not found." });
   res.json({ screening: publicScreening(screening) });
 });
 
-function deleteScreeningRecord(req, res) {
-  const screening = db.prepare(`
+async function deleteScreeningRecord(req, res) {
+  const screening = await db.get(`
     SELECT * FROM normal_abnormal_screenings
     WHERE id = ? AND user_id = ?
-  `).get(req.params.id, req.user.id);
+  `, req.params.id, req.user.id);
 
   if (!screening) return res.status(404).json({ message: "Screening record not found." });
 
   const now = new Date().toISOString();
-  db.transaction(() => {
-    db.prepare("DELETE FROM normal_abnormal_screenings WHERE id = ? AND user_id = ?").run(req.params.id, req.user.id);
-    db.prepare("UPDATE clinical_profiles SET updated_at = ? WHERE user_id = ?").run(now, req.user.id);
-  })();
+  await db.transaction(async () => {
+    await db.run("DELETE FROM normal_abnormal_screenings WHERE id = ? AND user_id = ?", req.params.id, req.user.id);
+    await db.run("UPDATE clinical_profiles SET updated_at = ? WHERE user_id = ?", now, req.user.id);
+  });
 
   safeUnlinkStoredFile(screening.file_path);
   safeUnlinkStoredFile(screening.csv_path);
 
-  const profile = db.prepare("SELECT * FROM clinical_profiles WHERE user_id = ?").get(req.user.id);
-  const latestScreenings = db.prepare(`
+  const profile = await db.get("SELECT * FROM clinical_profiles WHERE user_id = ?", req.user.id);
+  const latestScreenings = await db.all(`
     SELECT * FROM normal_abnormal_screenings
     WHERE user_id = ?
     ORDER BY created_at DESC
     LIMIT 20
-  `).all(req.user.id);
+  `, req.user.id);
 
   res.json({
     message: "Screening record deleted.",
@@ -226,24 +226,24 @@ function deleteScreeningRecord(req, res) {
 normalAbnormalRouter.delete("/screenings/:id", requireAuth, requireRole("patient"), deleteScreeningRecord);
 normalAbnormalRouter.post("/screenings/:id/delete", requireAuth, requireRole("patient"), deleteScreeningRecord);
 
-function clearScreeningRecords(req, res) {
-  const screenings = db.prepare(`
+async function clearScreeningRecords(req, res) {
+  const screenings = await db.all(`
     SELECT * FROM normal_abnormal_screenings
     WHERE user_id = ?
-  `).all(req.user.id);
+  `, req.user.id);
 
   const now = new Date().toISOString();
-  db.transaction(() => {
-    db.prepare("DELETE FROM normal_abnormal_screenings WHERE user_id = ?").run(req.user.id);
-    db.prepare("UPDATE clinical_profiles SET updated_at = ? WHERE user_id = ?").run(now, req.user.id);
-  })();
+  await db.transaction(async () => {
+    await db.run("DELETE FROM normal_abnormal_screenings WHERE user_id = ?", req.user.id);
+    await db.run("UPDATE clinical_profiles SET updated_at = ? WHERE user_id = ?", now, req.user.id);
+  });
 
   screenings.forEach((screening) => {
     safeUnlinkStoredFile(screening.file_path);
     safeUnlinkStoredFile(screening.csv_path);
   });
 
-  const profile = db.prepare("SELECT * FROM clinical_profiles WHERE user_id = ?").get(req.user.id);
+  const profile = await db.get("SELECT * FROM clinical_profiles WHERE user_id = ?", req.user.id);
 
   res.json({
     message: "All screening records cleared.",
@@ -279,24 +279,22 @@ normalAbnormalRouter.post(
       const profileId = createId("clin");
       const screeningId = createId("nas");
 
-      const save = db.transaction(() => {
-        const existingProfile = db.prepare("SELECT id FROM clinical_profiles WHERE user_id = ?").get(req.user.id);
+      const saved = await db.transaction(async () => {
+        const existingProfile = await db.get("SELECT id FROM clinical_profiles WHERE user_id = ?", req.user.id);
         const finalProfileId = existingProfile?.id || profileId;
 
-        db.prepare(`
+        await db.run(`
           INSERT INTO clinical_profiles (
             id, user_id, created_at, updated_at
           ) VALUES (?, ?, ?, ?)
           ON CONFLICT(user_id) DO UPDATE SET
             updated_at = excluded.updated_at
-        `).run(
-          finalProfileId,
+        `, finalProfileId,
           req.user.id,
           now,
-          now
-        );
+          now);
 
-        db.prepare(`
+        await db.run(`
           INSERT INTO normal_abnormal_screenings (
             id, user_id, clinical_profile_id, input_type, file_name, file_path,
             csv_path, direction, fps_used, final_label, final_result,
@@ -304,8 +302,7 @@ normalAbnormalRouter.post(
             confidence_percent, abnormal_ratio_threshold, screening_severity,
             reliability_level, reliability_reasons, clinical_note, raw_result_json, created_at
           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).run(
-          screeningId,
+        `, screeningId,
           req.user.id,
           finalProfileId,
           inputType,
@@ -326,20 +323,17 @@ normalAbnormalRouter.post(
           JSON.stringify(result.reliability_reasons || []),
           result.clinical_note || null,
           JSON.stringify(result),
-          now
-        );
+          now);
 
-        return db.prepare("SELECT * FROM normal_abnormal_screenings WHERE id = ?").get(screeningId);
+        return db.get("SELECT * FROM normal_abnormal_screenings WHERE id = ?", screeningId);
       });
-
-      const saved = save();
-      const profile = db.prepare("SELECT * FROM clinical_profiles WHERE user_id = ?").get(req.user.id);
-      const latestScreenings = db.prepare(`
+      const profile = await db.get("SELECT * FROM clinical_profiles WHERE user_id = ?", req.user.id);
+      const latestScreenings = await db.all(`
         SELECT * FROM normal_abnormal_screenings
         WHERE user_id = ?
         ORDER BY created_at DESC
         LIMIT 20
-      `).all(req.user.id);
+      `, req.user.id);
 
       res.status(201).json({
         message: "Normal vs abnormal screening completed and saved.",

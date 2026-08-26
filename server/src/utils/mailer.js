@@ -38,13 +38,22 @@ export async function sendPasswordVerificationEmail(email, code) {
     return { delivered: false };
   }
 
-  await transporter.sendMail({
-    from: config.smtp.from,
-    to: email,
-    subject,
-    text,
-    html
-  });
+  try {
+    await transporter.sendMail({
+      from: config.smtp.from,
+      to: email,
+      subject,
+      text,
+      html
+    });
 
-  return { delivered: true };
+    return { delivered: true };
+  } catch (error) {
+    console.warn(`[Gait AI Care] Password email delivery failed for ${email}: ${error.message}`);
+    if (config.nodeEnv === "development") {
+      console.log(`[Gait AI Care] Password verification code for ${email}: ${code}`);
+      return { delivered: false };
+    }
+    throw error;
+  }
 }

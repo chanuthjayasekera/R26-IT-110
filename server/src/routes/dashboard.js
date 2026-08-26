@@ -4,7 +4,7 @@ import { requireAuth, requireRole, requireVerifiedProfessional } from "../middle
 
 export const dashboardRouter = express.Router();
 
-dashboardRouter.get("/patient", requireAuth, requireRole("patient"), (req, res) => {
+dashboardRouter.get("/patient", requireAuth, requireRole("patient"), async (req, res) => {
   res.json({
     message: "Patient dashboard loaded.",
     modules: [
@@ -16,8 +16,8 @@ dashboardRouter.get("/patient", requireAuth, requireRole("patient"), (req, res) 
   });
 });
 
-dashboardRouter.get("/professional", requireAuth, requireRole("professional"), requireVerifiedProfessional, (req, res) => {
-  const patients = db.prepare(`
+dashboardRouter.get("/professional", requireAuth, requireRole("professional"), requireVerifiedProfessional, async (req, res) => {
+  const patients = await db.all(`
     SELECT u.id, u.full_name, u.email, MAX(cpf.updated_at) AS created_at, COUNT(DISTINCT cpf.source_type) AS completed_slots
     FROM users u
     JOIN central_profile_flags cpf ON cpf.user_id = u.id
@@ -29,7 +29,7 @@ dashboardRouter.get("/professional", requireAuth, requireRole("professional"), r
     GROUP BY u.id
     ORDER BY MAX(cpf.updated_at) DESC
     LIMIT 8
-  `).all();
+  `);
   res.json({
     message: "Medical professional dashboard loaded.",
     modules: [
@@ -42,22 +42,22 @@ dashboardRouter.get("/professional", requireAuth, requireRole("professional"), r
   });
 });
 
-dashboardRouter.get("/admin", requireAuth, requireRole("admin"), (req, res) => {
-  const patients = db.prepare(`
+dashboardRouter.get("/admin", requireAuth, requireRole("admin"), async (req, res) => {
+  const patients = await db.all(`
     SELECT id, full_name, email, phone, created_at
     FROM users
     WHERE role = 'patient'
     ORDER BY created_at DESC
-  `).all();
+  `);
 
-  const professionals = db.prepare(`
+  const professionals = await db.all(`
     SELECT id, full_name, email, phone, medical_license, specialization, hospital, hospital_email,
            years_experience, license_proof_name, license_proof_data, verification_status,
            verification_message, created_at
     FROM users
     WHERE role = 'professional'
     ORDER BY created_at DESC
-  `).all();
+  `);
 
   res.json({
     message: "Admin dashboard loaded.",
@@ -66,7 +66,7 @@ dashboardRouter.get("/admin", requireAuth, requireRole("admin"), (req, res) => {
   });
 });
 
-dashboardRouter.patch("/admin/professionals/:id/status", requireAuth, requireRole("admin"), (req, res) => {
+dashboardRouter.patch("/admin/professionals/:id/status", requireAuth, requireRole("admin"), async (req, res) => {
   const { id } = req.params;
   const status = String(req.body.status || "").trim();
   const message = String(req.body.message || "").trim();
@@ -75,20 +75,18 @@ dashboardRouter.patch("/admin/professionals/:id/status", requireAuth, requireRol
     return res.status(422).json({ message: "Invalid approval status." });
   }
 
-  const professional = db.prepare("SELECT * FROM users WHERE id = ? AND role = 'professional'").get(id);
+  const professional = await db.get("SELECT * FROM users WHERE id = ? AND role = 'professional'", id);
   if (!professional) return res.status(404).json({ message: "Medical professional not found." });
 
-  db.prepare(`
+  await db.run(`
     UPDATE users
     SET verification_status = ?, is_verified = ?, verification_message = ?, updated_at = ?
     WHERE id = ?
-  `).run(
-    status,
+  `, status,
     status === "approved" ? 1 : 0,
     message || (status === "approved" ? "Approved by admin." : status === "rejected" ? "Rejected by admin." : "Pending admin review."),
     new Date().toISOString(),
-    id
-  );
+    id);
 
   res.json({ message: `Medical professional ${status}.` });
 });

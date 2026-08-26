@@ -115,12 +115,12 @@ function getSourceType(body) {
   return Object.prototype.hasOwnProperty.call(sourceLabels, sourceType) ? sourceType : "";
 }
 
-function getScreeningForSource(userId, sourceType, screeningId) {
+async function getScreeningForSource(userId, sourceType, screeningId) {
   if (sourceType === "normal_abnormal") {
-    const row = db.prepare(`
+    const row = await db.get(`
       SELECT * FROM normal_abnormal_screenings
       WHERE user_id = ? AND id = ?
-    `).get(userId, screeningId);
+    `, userId, screeningId);
     if (!row) return null;
     return {
       sourceType,
@@ -155,13 +155,13 @@ function getScreeningForSource(userId, sourceType, screeningId) {
   }
 
   if (sourceType === "sca" || sourceType === "koa") {
-    const row = db.prepare(`
+    const row = await db.get(`
       SELECT * FROM sca_koa_screenings
       WHERE user_id = ? AND id = ? AND model_key = ?
-    `).get(userId, screeningId, sourceType);
+    `, userId, screeningId, sourceType);
     if (!row) return null;
     const genetics = sourceType === "sca"
-      ? db.prepare("SELECT * FROM sca_genetic_awareness WHERE user_id = ? AND screening_id = ?").get(userId, screeningId)
+      ? await db.get("SELECT * FROM sca_genetic_awareness WHERE user_id = ? AND screening_id = ?", userId, screeningId)
       : null;
     return {
       sourceType,
@@ -201,10 +201,10 @@ function getScreeningForSource(userId, sourceType, screeningId) {
   }
 
   if (sourceType === "pd" || sourceType === "neuropathy") {
-    const row = db.prepare(`
+    const row = await db.get(`
       SELECT * FROM pd_neuropathy_screenings
       WHERE user_id = ? AND id = ? AND model_key = ?
-    `).get(userId, screeningId, sourceType);
+    `, userId, screeningId, sourceType);
     if (!row) return null;
     return {
       sourceType,
@@ -238,10 +238,10 @@ function getScreeningForSource(userId, sourceType, screeningId) {
 
   if (sourceType.startsWith("exercise_")) {
     const exerciseKey = sourceType.replace("exercise_", "");
-    const row = db.prepare(`
+    const row = await db.get(`
       SELECT * FROM exercise_screenings
       WHERE user_id = ? AND id = ? AND exercise_key = ?
-    `).get(userId, screeningId, exerciseKey);
+    `, userId, screeningId, exerciseKey);
     if (!row) return null;
     return {
       sourceType,
@@ -458,16 +458,16 @@ function publicExerciseScreening(row) {
   };
 }
 
-function getProfessionalDetails(userId, flag) {
+async function getProfessionalDetails(userId, flag) {
   const sourceType = flag.sourceType;
   if (sourceType === "normal_abnormal") {
-    const row = db.prepare("SELECT * FROM normal_abnormal_screenings WHERE user_id = ? AND id = ?").get(userId, flag.screeningId);
+    const row = await db.get("SELECT * FROM normal_abnormal_screenings WHERE user_id = ? AND id = ?", userId, flag.screeningId);
     return publicNormalScreening(row);
   }
   if (sourceType === "sca" || sourceType === "koa") {
-    const row = db.prepare("SELECT * FROM sca_koa_screenings WHERE user_id = ? AND id = ? AND model_key = ?").get(userId, flag.screeningId, sourceType);
+    const row = await db.get("SELECT * FROM sca_koa_screenings WHERE user_id = ? AND id = ? AND model_key = ?", userId, flag.screeningId, sourceType);
     const genetics = sourceType === "sca"
-      ? db.prepare("SELECT * FROM sca_genetic_awareness WHERE user_id = ? AND screening_id = ?").get(userId, flag.screeningId)
+      ? await db.get("SELECT * FROM sca_genetic_awareness WHERE user_id = ? AND screening_id = ?", userId, flag.screeningId)
       : null;
     return {
       screening: publicScaKoaScreening(row),
@@ -480,25 +480,25 @@ function getProfessionalDetails(userId, flag) {
     };
   }
   if (sourceType === "pd" || sourceType === "neuropathy") {
-    const row = db.prepare("SELECT * FROM pd_neuropathy_screenings WHERE user_id = ? AND id = ? AND model_key = ?").get(userId, flag.screeningId, sourceType);
+    const row = await db.get("SELECT * FROM pd_neuropathy_screenings WHERE user_id = ? AND id = ? AND model_key = ?", userId, flag.screeningId, sourceType);
     return publicPdNeuropathyScreening(row);
   }
   if (sourceType.startsWith("exercise_")) {
-    const row = db.prepare("SELECT * FROM exercise_screenings WHERE user_id = ? AND id = ? AND exercise_key = ?").get(userId, flag.screeningId, sourceType.replace("exercise_", ""));
+    const row = await db.get("SELECT * FROM exercise_screenings WHERE user_id = ? AND id = ? AND exercise_key = ?", userId, flag.screeningId, sourceType.replace("exercise_", ""));
     return publicExerciseScreening(row);
   }
   return null;
 }
 
-function guidanceForPatient(patientId) {
-  const rows = db.prepare(`
+async function guidanceForPatient(patientId) {
+  const rows = await db.all(`
     SELECT g.*, u.full_name AS doctor_name
     FROM central_profile_guidance g
     LEFT JOIN users u ON u.id = g.professional_user_id
     WHERE g.patient_user_id = ?
     ORDER BY g.created_at DESC
-  `).all(patientId);
-  enforceSharedGuidanceReviewDates(rows);
+  `, patientId);
+  await enforceSharedGuidanceReviewDates(rows);
   const all = rows.map(publicGuidance);
   return {
     risk: all.filter((item) => item.guidanceType === "risk"),
@@ -599,15 +599,15 @@ function reviewDateOnly(value) {
   return date.toISOString().slice(0, 10);
 }
 
-function sharedGuidanceReviewConflict(patientId, reviewDueAt, excludeGuidanceId = "") {
+async function sharedGuidanceReviewConflict(patientId, reviewDueAt, excludeGuidanceId = "") {
   if (!patientId || !reviewDueAt) return null;
-  const rows = db.prepare(`
+  const rows = await db.all(`
     SELECT id, payload_json
     FROM central_profile_guidance
     WHERE patient_user_id = ?
       AND id != ?
     ORDER BY updated_at DESC
-  `).all(patientId, excludeGuidanceId || "");
+  `, patientId, excludeGuidanceId || "");
   const requestedDate = reviewDateOnly(reviewDueAt);
   for (const row of rows) {
     const payload = parseJson(row.payload_json, {});
@@ -659,14 +659,13 @@ function normalizeGuidanceSummary(summary) {
   return summary;
 }
 
-function syncPatientGuidanceReviewDate(patientId, reviewDueAt, now = new Date().toISOString(), reviewChoice = "") {
+async function syncPatientGuidanceReviewDate(patientId, reviewDueAt, now = new Date().toISOString(), reviewChoice = "") {
   if (!patientId || !reviewDueAt) return;
-  const rows = db.prepare("SELECT id, guidance_type, payload_json FROM central_profile_guidance WHERE patient_user_id = ?").all(patientId);
-  const updatePayload = db.prepare("UPDATE central_profile_guidance SET payload_json = ?, updated_at = ? WHERE id = ?");
+  const rows = await db.all("SELECT id, guidance_type, payload_json FROM central_profile_guidance WHERE patient_user_id = ?", patientId);
   for (const row of rows) {
     const payload = parseJson(row.payload_json, {});
     applySharedReviewPayload(payload, row.guidance_type, reviewDueAt, reviewChoice);
-    updatePayload.run(JSON.stringify(payload), now, row.id);
+    await db.run("UPDATE central_profile_guidance SET payload_json = ?, updated_at = ? WHERE id = ?", JSON.stringify(payload), now, row.id);
   }
 }
 
@@ -684,7 +683,7 @@ function latestReviewDetailsFromRows(rows) {
   return latest;
 }
 
-function enforceSharedGuidanceReviewDates(rows) {
+async function enforceSharedGuidanceReviewDates(rows) {
   if (!Array.isArray(rows) || rows.length === 0) return;
   const byPatient = new Map();
   for (const row of rows) {
@@ -693,7 +692,6 @@ function enforceSharedGuidanceReviewDates(rows) {
     byPatient.set(row.patient_user_id, list);
   }
 
-  const updatePayload = db.prepare("UPDATE central_profile_guidance SET payload_json = ?, updated_at = ? WHERE id = ?");
   const now = new Date().toISOString();
   for (const patientRows of byPatient.values()) {
     const sharedReview = latestReviewDetailsFromRows(patientRows);
@@ -704,32 +702,32 @@ function enforceSharedGuidanceReviewDates(rows) {
       if (JSON.stringify(parseJson(row.payload_json, {})) === JSON.stringify(nextPayload)) continue;
       row.payload_json = JSON.stringify(payload);
       row.updated_at = now;
-      updatePayload.run(row.payload_json, now, row.id);
+      await db.run("UPDATE central_profile_guidance SET payload_json = ?, updated_at = ? WHERE id = ?", row.payload_json, now, row.id);
     }
   }
 }
 
-centralProfileRouter.get("/professional/profiles", requireAuth, requireRole("professional"), requireVerifiedProfessional, (req, res) => {
+centralProfileRouter.get("/professional/profiles", requireAuth, requireRole("professional"), requireVerifiedProfessional, async (req, res) => {
   const dateFrom = String(req.query.dateFrom || "").trim();
   const dateTo = String(req.query.dateTo || "").trim();
   const normalFilter = String(req.query.normal || "all").trim();
   const diseaseType = String(req.query.diseaseType || "all").trim();
   const guidanceStatus = String(req.query.guidanceStatus || "all").trim();
 
-  const rows = db.prepare(`
+  const rows = await db.all(`
     SELECT cpf.*, u.full_name, u.email
     FROM central_profile_flags cpf
     JOIN users u ON u.id = cpf.user_id
     WHERE u.role = 'patient'
     ORDER BY cpf.user_id, cpf.updated_at DESC
-  `).all();
+  `);
 
-  const guidanceRows = db.prepare(`
+  const guidanceRows = await db.all(`
     SELECT *
     FROM central_profile_guidance
     ORDER BY created_at DESC
-  `).all();
-  enforceSharedGuidanceReviewDates(guidanceRows);
+  `);
+  await enforceSharedGuidanceReviewDates(guidanceRows);
 
   const guidanceByPatient = new Map();
   for (const item of guidanceRows) {
@@ -822,11 +820,11 @@ centralProfileRouter.get("/professional/profiles", requireAuth, requireRole("pro
   res.json({ profiles });
 });
 
-centralProfileRouter.get("/professional/profiles/:patientId", requireAuth, requireRole("professional"), requireVerifiedProfessional, (req, res) => {
-  const patient = db.prepare("SELECT id, full_name, email, phone, date_of_birth, gender FROM users WHERE id = ? AND role = 'patient'").get(req.params.patientId);
+centralProfileRouter.get("/professional/profiles/:patientId", requireAuth, requireRole("professional"), requireVerifiedProfessional, async (req, res) => {
+  const patient = await db.get("SELECT id, full_name, email, phone, date_of_birth, gender FROM users WHERE id = ? AND role = 'patient'", req.params.patientId);
   if (!patient) return res.status(404).json({ message: "Patient profile not found." });
 
-  const rows = db.prepare("SELECT * FROM central_profile_flags WHERE user_id = ?").all(patient.id);
+  const rows = await db.all("SELECT * FROM central_profile_flags WHERE user_id = ?", patient.id);
   const flags = rows.map(publicFlag).sort((a, b) => sourceOrder.indexOf(a.sourceType) - sourceOrder.indexOf(b.sourceType));
   if (flags.length === 0) {
     return res.status(404).json({ message: "This patient has not selected any centralized profile results yet." });
@@ -843,8 +841,8 @@ centralProfileRouter.get("/professional/profiles/:patientId", requireAuth, requi
     },
     profile: centralSummary(flags),
     flags,
-    details: Object.fromEntries(flags.map((flag) => [flag.sourceType, getProfessionalDetails(patient.id, flag)])),
-    guidance: guidanceForPatient(patient.id),
+    details: Object.fromEntries(await Promise.all(flags.map(async (flag) => [flag.sourceType, await getProfessionalDetails(patient.id, flag)]))),
+    guidance: await guidanceForPatient(patient.id),
     sourceOrder: sourceOrder.map((sourceType) => ({ sourceType, sourceLabel: sourceLabels[sourceType] }))
   });
 });
@@ -855,11 +853,11 @@ centralProfileRouter.post(
   requireRole("professional"),
   requireVerifiedProfessional,
   uploadGuidanceAttachment,
-  (req, res) => {
-    const patient = db.prepare("SELECT id FROM users WHERE id = ? AND role = 'patient'").get(req.params.patientId);
+  async (req, res) => {
+    const patient = await db.get("SELECT id FROM users WHERE id = ? AND role = 'patient'", req.params.patientId);
     if (!patient) return res.status(404).json({ message: "Patient profile not found." });
 
-    const flags = db.prepare("SELECT * FROM central_profile_flags WHERE user_id = ?").all(patient.id).map(publicFlag);
+    const flags = (await db.all("SELECT * FROM central_profile_flags WHERE user_id = ?", patient.id)).map(publicFlag);
     if (flags.length === 0) {
       return res.status(404).json({ message: "This patient has not selected any centralized profile results yet." });
     }
@@ -875,7 +873,7 @@ centralProfileRouter.post(
     if (!title || !priority || !payload || typeof payload !== "object") {
       return res.status(422).json({ message: "Complete the required guidance fields before submitting." });
     }
-    const reviewConflict = sharedGuidanceReviewConflict(patient.id, payload.reviewDueAt);
+    const reviewConflict = await sharedGuidanceReviewConflict(patient.id, payload.reviewDueAt);
     if (reviewConflict) {
       return res.status(422).json({ message: sharedGuidanceReviewError(reviewConflict) });
     }
@@ -885,14 +883,13 @@ centralProfileRouter.post(
     const now = new Date().toISOString();
     const id = createId(guidanceType === "risk" ? "risk" : "rehab");
 
-    db.prepare(`
+    await db.run(`
       INSERT INTO central_profile_guidance (
         id, patient_user_id, professional_user_id, guidance_type, title,
         source_type, disease_focus, priority, payload_json,
         attachment_name, attachment_path, created_at, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      id,
+    `, id,
       patient.id,
       req.user.id,
       guidanceType,
@@ -904,16 +901,15 @@ centralProfileRouter.post(
       req.file?.originalname || null,
       req.file?.path || null,
       now,
-      now
-    );
-    syncPatientGuidanceReviewDate(patient.id, payload.reviewDueAt, now, reviewChoiceFromPayload(payload));
+      now);
+    await syncPatientGuidanceReviewDate(patient.id, payload.reviewDueAt, now, reviewChoiceFromPayload(payload));
 
-    const saved = db.prepare(`
+    const saved = await db.get(`
       SELECT g.*, u.full_name AS doctor_name
       FROM central_profile_guidance g
       LEFT JOIN users u ON u.id = g.professional_user_id
       WHERE g.id = ?
-    `).get(id);
+    `, id);
 
     res.json({
       message: guidanceType === "risk" ? "Risk profile uploaded to the patient centralized profile." : "Recommendation and rehabilitation plan uploaded to the patient centralized profile.",
@@ -927,8 +923,8 @@ centralProfileRouter.patch(
   requireAuth,
   requireRole("professional"),
   requireVerifiedProfessional,
-  (req, res) => {
-    const patient = db.prepare("SELECT id FROM users WHERE id = ? AND role = 'patient'").get(req.params.patientId);
+  async (req, res) => {
+    const patient = await db.get("SELECT id FROM users WHERE id = ? AND role = 'patient'", req.params.patientId);
     if (!patient) return res.status(404).json({ message: "Patient profile not found." });
 
     const reviewDueAt = String(req.body.reviewDueAt || "").trim();
@@ -937,22 +933,21 @@ centralProfileRouter.patch(
       return res.status(422).json({ message: "Choose a valid shared doctor review date." });
     }
 
-    const rows = db.prepare(`
+    const rows = await db.all(`
       SELECT id, guidance_type, payload_json
       FROM central_profile_guidance
       WHERE patient_user_id = ?
         AND professional_user_id = ?
-    `).all(patient.id, req.user.id);
+    `, patient.id, req.user.id);
     if (rows.length === 0) {
       return res.status(404).json({ message: "Upload risk or rehab guidance before setting a shared review date." });
     }
 
-    const updatePayload = db.prepare("UPDATE central_profile_guidance SET payload_json = ?, patient_viewed_at = NULL, updated_at = ? WHERE id = ?");
     const now = new Date().toISOString();
     for (const row of rows) {
       const payload = parseJson(row.payload_json, {});
       applySharedReviewPayload(payload, row.guidance_type, reviewDueAt, reviewChoice);
-      updatePayload.run(JSON.stringify(payload), now, row.id);
+      await db.run("UPDATE central_profile_guidance SET payload_json = ?, patient_viewed_at = NULL, updated_at = ? WHERE id = ?", JSON.stringify(payload), now, row.id);
     }
 
     res.json({ message: "Shared doctor review date updated for this patient profile.", reviewDueAt });
@@ -965,11 +960,11 @@ centralProfileRouter.patch(
   requireRole("professional"),
   requireVerifiedProfessional,
   uploadGuidanceAttachment,
-  (req, res) => {
-    const existing = db.prepare(`
+  async (req, res) => {
+    const existing = await db.get(`
       SELECT * FROM central_profile_guidance
       WHERE id = ? AND professional_user_id = ?
-    `).get(req.params.id, req.user.id);
+    `, req.params.id, req.user.id);
     if (!existing) return res.status(404).json({ message: "Guidance item not found." });
 
     const title = String(req.body.title || "").trim();
@@ -983,7 +978,7 @@ centralProfileRouter.patch(
     if (guidanceType !== existing.guidance_type) {
       return res.status(422).json({ message: "Guidance type cannot be changed while editing." });
     }
-    const reviewConflict = sharedGuidanceReviewConflict(existing.patient_user_id, payload.reviewDueAt, existing.id);
+    const reviewConflict = await sharedGuidanceReviewConflict(existing.patient_user_id, payload.reviewDueAt, existing.id);
     if (reviewConflict) {
       return res.status(422).json({ message: sharedGuidanceReviewError(reviewConflict) });
     }
@@ -994,7 +989,7 @@ centralProfileRouter.patch(
     if ((req.file || removeAttachment) && existing.attachment_path) safeUnlinkGuidanceFile(existing.attachment_path);
 
     const now = new Date().toISOString();
-    db.prepare(`
+    await db.run(`
       UPDATE central_profile_guidance
       SET title = ?,
           source_type = ?,
@@ -1006,8 +1001,7 @@ centralProfileRouter.patch(
           patient_viewed_at = NULL,
           updated_at = ?
       WHERE id = ? AND professional_user_id = ?
-    `).run(
-      title,
+    `, title,
       String(req.body.sourceType || "").trim() || null,
       String(req.body.diseaseFocus || "").trim() || null,
       priority,
@@ -1016,35 +1010,34 @@ centralProfileRouter.patch(
       attachmentPath,
       now,
       existing.id,
-      req.user.id
-    );
-    syncPatientGuidanceReviewDate(existing.patient_user_id, payload.reviewDueAt, now, reviewChoiceFromPayload(payload));
+      req.user.id);
+    await syncPatientGuidanceReviewDate(existing.patient_user_id, payload.reviewDueAt, now, reviewChoiceFromPayload(payload));
 
-    const saved = db.prepare(`
+    const saved = await db.get(`
       SELECT g.*, u.full_name AS doctor_name
       FROM central_profile_guidance g
       LEFT JOIN users u ON u.id = g.professional_user_id
       WHERE g.id = ?
-    `).get(existing.id);
+    `, existing.id);
 
     res.json({ message: "Guidance item updated.", guidance: publicGuidance(saved) });
   }
 );
 
-centralProfileRouter.delete("/professional/guidance/:id", requireAuth, requireRole("professional"), requireVerifiedProfessional, (req, res) => {
-  const existing = db.prepare(`
+centralProfileRouter.delete("/professional/guidance/:id", requireAuth, requireRole("professional"), requireVerifiedProfessional, async (req, res) => {
+  const existing = await db.get(`
     SELECT * FROM central_profile_guidance
     WHERE id = ? AND professional_user_id = ?
-  `).get(req.params.id, req.user.id);
+  `, req.params.id, req.user.id);
   if (!existing) return res.status(404).json({ message: "Guidance item not found." });
 
   safeUnlinkGuidanceFile(existing.attachment_path);
-  db.prepare("DELETE FROM central_profile_guidance WHERE id = ? AND professional_user_id = ?").run(existing.id, req.user.id);
+  await db.run("DELETE FROM central_profile_guidance WHERE id = ? AND professional_user_id = ?", existing.id, req.user.id);
   res.json({ message: "Guidance item deleted." });
 });
 
-centralProfileRouter.get("/guidance/:id/attachment", requireAuth, (req, res) => {
-  const row = db.prepare("SELECT * FROM central_profile_guidance WHERE id = ?").get(req.params.id);
+centralProfileRouter.get("/guidance/:id/attachment", requireAuth, async (req, res) => {
+  const row = await db.get("SELECT * FROM central_profile_guidance WHERE id = ?", req.params.id);
   if (!row || !row.attachment_path) return res.status(404).json({ message: "Attachment not found." });
   const allowed = req.user.role === "patient"
     ? row.patient_user_id === req.user.id
@@ -1057,19 +1050,19 @@ centralProfileRouter.get("/guidance/:id/attachment", requireAuth, (req, res) => 
   res.sendFile(absolutePath);
 });
 
-centralProfileRouter.post("/guidance/:id/read", requireAuth, requireRole("patient"), (req, res) => {
-  const row = db.prepare("SELECT * FROM central_profile_guidance WHERE id = ? AND patient_user_id = ?").get(req.params.id, req.user.id);
+centralProfileRouter.post("/guidance/:id/read", requireAuth, requireRole("patient"), async (req, res) => {
+  const row = await db.get("SELECT * FROM central_profile_guidance WHERE id = ? AND patient_user_id = ?", req.params.id, req.user.id);
   if (!row) return res.status(404).json({ message: "Guidance item not found." });
   const now = new Date().toISOString();
-  db.prepare("UPDATE central_profile_guidance SET patient_viewed_at = COALESCE(patient_viewed_at, ?), updated_at = ? WHERE id = ?").run(now, now, row.id);
+  await db.run("UPDATE central_profile_guidance SET patient_viewed_at = COALESCE(patient_viewed_at, ?), updated_at = ? WHERE id = ?", now, now, row.id);
   res.json({ message: "Guidance marked as viewed." });
 });
 
-centralProfileRouter.get("/", requireAuth, requireRole("patient"), (req, res) => {
-  const rows = db.prepare(`
+centralProfileRouter.get("/", requireAuth, requireRole("patient"), async (req, res) => {
+  const rows = await db.all(`
     SELECT * FROM central_profile_flags
     WHERE user_id = ?
-  `).all(req.user.id);
+  `, req.user.id);
 
   const flags = rows
     .map(publicFlag)
@@ -1078,7 +1071,7 @@ centralProfileRouter.get("/", requireAuth, requireRole("patient"), (req, res) =>
   res.json({
     profile: centralSummary(flags),
     flags,
-    guidance: guidanceForPatient(req.user.id),
+    guidance: await guidanceForPatient(req.user.id),
     sourceOrder: sourceOrder.map((sourceType) => ({
       sourceType,
       sourceLabel: sourceLabels[sourceType]
@@ -1086,25 +1079,25 @@ centralProfileRouter.get("/", requireAuth, requireRole("patient"), (req, res) =>
   });
 });
 
-centralProfileRouter.post("/flags", requireAuth, requireRole("patient"), (req, res) => {
+centralProfileRouter.post("/flags", requireAuth, requireRole("patient"), async (req, res) => {
   const sourceType = getSourceType(req.body);
   const screeningId = String(req.body?.screeningId || "").trim();
   if (!sourceType || !screeningId) {
     return res.status(422).json({ message: "Choose a valid screening result to add to the centralized profile." });
   }
 
-  const snapshot = getScreeningForSource(req.user.id, sourceType, screeningId);
+  const snapshot = await getScreeningForSource(req.user.id, sourceType, screeningId);
   if (!snapshot) {
     return res.status(404).json({ message: "Screening result not found for this profile section." });
   }
 
   const now = new Date().toISOString();
-  const existing = db.prepare(`
+  const existing = await db.get(`
     SELECT id, created_at FROM central_profile_flags
     WHERE user_id = ? AND source_type = ?
-  `).get(req.user.id, sourceType);
+  `, req.user.id, sourceType);
 
-  db.prepare(`
+  await db.run(`
     INSERT INTO central_profile_flags (
       id, user_id, source_type, screening_id, snapshot_json,
       flagged_at, created_at, updated_at
@@ -1114,21 +1107,19 @@ centralProfileRouter.post("/flags", requireAuth, requireRole("patient"), (req, r
       snapshot_json = excluded.snapshot_json,
       flagged_at = excluded.flagged_at,
       updated_at = excluded.updated_at
-  `).run(
-    existing?.id || createId("cpf"),
+  `, existing?.id || createId("cpf"),
     req.user.id,
     sourceType,
     screeningId,
     JSON.stringify(snapshot),
     now,
     existing?.created_at || now,
-    now
-  );
+    now);
 
-  const saved = db.prepare(`
+  const saved = await db.get(`
     SELECT * FROM central_profile_flags
     WHERE user_id = ? AND source_type = ?
-  `).get(req.user.id, sourceType);
+  `, req.user.id, sourceType);
 
   res.json({
     message: `${sourceLabels[sourceType]} result selected for the centralized profile.`,
@@ -1136,14 +1127,14 @@ centralProfileRouter.post("/flags", requireAuth, requireRole("patient"), (req, r
   });
 });
 
-centralProfileRouter.delete("/flags/:sourceType", requireAuth, requireRole("patient"), (req, res) => {
+centralProfileRouter.delete("/flags/:sourceType", requireAuth, requireRole("patient"), async (req, res) => {
   const sourceType = getSourceType({ sourceType: req.params.sourceType });
   if (!sourceType) return res.status(404).json({ message: "Central profile section not found." });
 
-  db.prepare(`
+  await db.run(`
     DELETE FROM central_profile_flags
     WHERE user_id = ? AND source_type = ?
-  `).run(req.user.id, sourceType);
+  `, req.user.id, sourceType);
 
   res.json({ message: `${sourceLabels[sourceType]} central result cleared.` });
 });

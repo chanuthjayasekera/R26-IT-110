@@ -1,34 +1,78 @@
-/* file: server/src/db.js */
+import { AsyncLocalStorage } from "async_hooks";
+import pg from "pg";
+import { config } from "./config.js";
+import { createId, hashPassword } from "./utils/security.js";
 
-import Database from "better-sqlite3";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-import { hashPassword } from "./utils/security.js";
-import { createId } from "./utils/security.js";
+const { Pool } = pg;
 
-const dirname = path.dirname(fileURLToPath(import.meta.url));
-const dataDir = path.join(dirname, "..", "data");
-if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-const dbPath = path.join(dataDir, "app.db");
-
-export const db = new Database(dbPath);
-db.pragma("journal_mode = WAL");
-db.pragma("foreign_keys = ON");
-
-function columnExists(table, column) {
-  const rows = db.prepare(`PRAGMA table_info(${table})`).all();
-  return rows.some((row) => row.name === column);
+if (!config.databaseUrl) {
+  throw new Error("DATABASE_URL is required. Add your PostgreSQL connection string to server/.env.");
 }
 
-function addColumn(table, column, definition) {
-  if (!columnExists(table, column)) {
-    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+const usesSsl = /sslmode=require/i.test(config.databaseUrl) || /\.neon\.tech/i.test(config.databaseUrl);
+const pool = new Pool({
+  connectionString: config.databaseUrl,
+  ssl: usesSsl ? { rejectUnauthorized: false } : undefined
+});
+
+const transactionStore = new AsyncLocalStorage();
+
+function activeClient() {
+  return transactionStore.getStore() || pool;
+}
+
+function toPostgresSql(sql) {
+  let parameterIndex = 0;
+  return String(sql).replace(/\?/g, () => `$${++parameterIndex}`);
+}
+
+async function query(sql, params = []) {
+  const values = Array.isArray(params) ? params : [params];
+  return activeClient().query(toPostgresSql(sql), values);
+}
+
+export const db = {
+  async exec(sql) {
+    return activeClient().query(sql);
+  },
+
+  async get(sql, ...params) {
+    const result = await query(sql, params);
+    return result.rows[0];
+  },
+
+  async all(sql, ...params) {
+    const result = await query(sql, params);
+    return result.rows;
+  },
+
+  async run(sql, ...params) {
+    const result = await query(sql, params);
+    return { changes: result.rowCount };
+  },
+
+  async transaction(callback) {
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const result = await transactionStore.run(client, callback);
+      await client.query("COMMIT");
+      return result;
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
   }
+};
+
+async function addColumn(table, column, definition) {
+  await db.exec(`ALTER TABLE ${table} ADD COLUMN IF NOT EXISTS ${column} ${definition}`);
 }
 
 export async function migrate() {
-  db.exec(`
+  await db.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
       role TEXT NOT NULL CHECK(role IN ('patient','professional','admin')),
@@ -253,28 +297,28 @@ export async function migrate() {
       ON central_profile_guidance(patient_user_id, guidance_type, created_at DESC);
   `);
 
-  addColumn("users", "verification_status", "TEXT NOT NULL DEFAULT 'approved'");
-  addColumn("users", "verification_message", "TEXT");
-  addColumn("users", "hospital_email", "TEXT");
-  addColumn("users", "license_proof_name", "TEXT");
-  addColumn("users", "license_proof_data", "TEXT");
-  addColumn("users", "profile_image", "TEXT");
-  addColumn("sca_koa_screenings", "instability_json", "TEXT");
-  addColumn("central_profile_flags", "risk_json", "TEXT");
-  addColumn("central_profile_flags", "rehab_json", "TEXT");
+  await addColumn("users", "verification_status", "TEXT NOT NULL DEFAULT 'approved'");
+  await addColumn("users", "verification_message", "TEXT");
+  await addColumn("users", "hospital_email", "TEXT");
+  await addColumn("users", "license_proof_name", "TEXT");
+  await addColumn("users", "license_proof_data", "TEXT");
+  await addColumn("users", "profile_image", "TEXT");
+  await addColumn("sca_koa_screenings", "instability_json", "TEXT");
+  await addColumn("central_profile_flags", "risk_json", "TEXT");
+  await addColumn("central_profile_flags", "rehab_json", "TEXT");
 
-  db.prepare("DELETE FROM users WHERE email = ?").run("admin@gaitai.local");
+  await db.run("DELETE FROM users WHERE email = ?", "admin@gaitai.local");
 
   const now = new Date().toISOString();
   const adminEmail = "admingaitailocal@gmail.com";
-  const existingAdmin = db.prepare("SELECT id FROM users WHERE email = ?").get(adminEmail);
+  const existingAdmin = await db.get("SELECT id FROM users WHERE email = ?", adminEmail);
   if (!existingAdmin) {
     const passwordHash = await hashPassword("Admin@123!");
-    db.prepare(`
+    await db.run(`
       INSERT INTO users (
         id, role, full_name, email, password_hash, phone, is_verified,
         verification_status, created_at, updated_at
       ) VALUES (?, 'admin', 'System Admin', ?, ?, ?, 1, 'approved', ?, ?)
-    `).run(createId("adm"), adminEmail, passwordHash, "+0000000000", now, now);
+    `, createId("adm"), adminEmail, passwordHash, "+0000000000", now, now);
   }
 }

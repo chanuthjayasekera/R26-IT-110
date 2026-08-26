@@ -184,28 +184,28 @@ function safeUnlinkStoredFile(storedPath) {
   fs.promises.unlink(absolutePath).catch(() => {});
 }
 
-function latestScreenings(userId) {
-  return db.prepare(`
+async function latestScreenings(userId) {
+  return db.all(`
     SELECT * FROM pd_neuropathy_screenings
     WHERE user_id = ?
     ORDER BY created_at DESC
     LIMIT 40
-  `).all(userId);
+  `, userId);
 }
 
-pdNeuropathyRouter.get("/clinical-profile", requireAuth, requireRole("patient"), (req, res) => {
-  const screenings = latestScreenings(req.user.id);
+pdNeuropathyRouter.get("/clinical-profile", requireAuth, requireRole("patient"), async (req, res) => {
+  const screenings = await latestScreenings(req.user.id);
   res.json({
     profile: publicComponent3Profile(screenings),
     screenings: screenings.map(publicScreening)
   });
 });
 
-pdNeuropathyRouter.get("/screenings/:id/file", requireAuth, requireRole("patient"), (req, res) => {
-  const screening = db.prepare(`
+pdNeuropathyRouter.get("/screenings/:id/file", requireAuth, requireRole("patient"), async (req, res) => {
+  const screening = await db.get(`
     SELECT * FROM pd_neuropathy_screenings
     WHERE id = ? AND user_id = ? AND input_type = 'video'
-  `).get(req.params.id, req.user.id);
+  `, req.params.id, req.user.id);
 
   if (!screening) return res.status(404).json({ message: "Screening video not found." });
 
@@ -221,34 +221,34 @@ pdNeuropathyRouter.get("/screenings/:id/file", requireAuth, requireRole("patient
   res.sendFile(absolutePath);
 });
 
-pdNeuropathyRouter.get("/screenings/:id", requireAuth, requireRole("patient"), (req, res) => {
-  const screening = db.prepare(`
+pdNeuropathyRouter.get("/screenings/:id", requireAuth, requireRole("patient"), async (req, res) => {
+  const screening = await db.get(`
     SELECT * FROM pd_neuropathy_screenings
     WHERE id = ? AND user_id = ?
-  `).get(req.params.id, req.user.id);
+  `, req.params.id, req.user.id);
 
   if (!screening) return res.status(404).json({ message: "Screening record not found." });
   res.json({ screening: publicScreening(screening) });
 });
 
-function deleteScreeningRecord(req, res) {
-  const screening = db.prepare(`
+async function deleteScreeningRecord(req, res) {
+  const screening = await db.get(`
     SELECT * FROM pd_neuropathy_screenings
     WHERE id = ? AND user_id = ?
-  `).get(req.params.id, req.user.id);
+  `, req.params.id, req.user.id);
 
   if (!screening) return res.status(404).json({ message: "Screening record not found." });
 
   const now = new Date().toISOString();
-  db.transaction(() => {
-    db.prepare("DELETE FROM pd_neuropathy_screenings WHERE id = ? AND user_id = ?").run(req.params.id, req.user.id);
-    db.prepare("UPDATE clinical_profiles SET updated_at = ? WHERE user_id = ?").run(now, req.user.id);
-  })();
+  await db.transaction(async () => {
+    await db.run("DELETE FROM pd_neuropathy_screenings WHERE id = ? AND user_id = ?", req.params.id, req.user.id);
+    await db.run("UPDATE clinical_profiles SET updated_at = ? WHERE user_id = ?", now, req.user.id);
+  });
 
   safeUnlinkStoredFile(screening.file_path);
   safeUnlinkStoredFile(screening.csv_path);
 
-  const remaining = latestScreenings(req.user.id);
+  const remaining = await latestScreenings(req.user.id);
   res.json({
     message: "Component 3 screening record deleted.",
     profile: publicComponent3Profile(remaining),
@@ -259,28 +259,28 @@ function deleteScreeningRecord(req, res) {
 pdNeuropathyRouter.delete("/screenings/:id", requireAuth, requireRole("patient"), deleteScreeningRecord);
 pdNeuropathyRouter.post("/screenings/:id/delete", requireAuth, requireRole("patient"), deleteScreeningRecord);
 
-function clearScreeningRecords(req, res) {
+async function clearScreeningRecords(req, res) {
   const modelKey = req.query.model ? normalizeModelKey(req.query.model) : null;
   const screenings = modelKey
-    ? db.prepare("SELECT * FROM pd_neuropathy_screenings WHERE user_id = ? AND model_key = ?").all(req.user.id, modelKey)
-    : db.prepare("SELECT * FROM pd_neuropathy_screenings WHERE user_id = ?").all(req.user.id);
+    ? await db.all("SELECT * FROM pd_neuropathy_screenings WHERE user_id = ? AND model_key = ?", req.user.id, modelKey)
+    : await db.all("SELECT * FROM pd_neuropathy_screenings WHERE user_id = ?", req.user.id);
 
   const now = new Date().toISOString();
-  db.transaction(() => {
+  await db.transaction(async () => {
     if (modelKey) {
-      db.prepare("DELETE FROM pd_neuropathy_screenings WHERE user_id = ? AND model_key = ?").run(req.user.id, modelKey);
+      await db.run("DELETE FROM pd_neuropathy_screenings WHERE user_id = ? AND model_key = ?", req.user.id, modelKey);
     } else {
-      db.prepare("DELETE FROM pd_neuropathy_screenings WHERE user_id = ?").run(req.user.id);
+      await db.run("DELETE FROM pd_neuropathy_screenings WHERE user_id = ?", req.user.id);
     }
-    db.prepare("UPDATE clinical_profiles SET updated_at = ? WHERE user_id = ?").run(now, req.user.id);
-  })();
+    await db.run("UPDATE clinical_profiles SET updated_at = ? WHERE user_id = ?", now, req.user.id);
+  });
 
   screenings.forEach((screening) => {
     safeUnlinkStoredFile(screening.file_path);
     safeUnlinkStoredFile(screening.csv_path);
   });
 
-  const remaining = latestScreenings(req.user.id);
+  const remaining = await latestScreenings(req.user.id);
   res.json({
     message: "Component 3 screening records cleared.",
     profile: publicComponent3Profile(remaining),
@@ -317,27 +317,26 @@ pdNeuropathyRouter.post(
       const profileId = createId("clin");
       const screeningId = createId("c3s");
 
-      const save = db.transaction(() => {
-        const existingProfile = db.prepare("SELECT id FROM clinical_profiles WHERE user_id = ?").get(req.user.id);
+      const saved = await db.transaction(async () => {
+        const existingProfile = await db.get("SELECT id FROM clinical_profiles WHERE user_id = ?", req.user.id);
         const finalProfileId = existingProfile?.id || profileId;
 
-        db.prepare(`
+        await db.run(`
           INSERT INTO clinical_profiles (
             id, user_id, created_at, updated_at
           ) VALUES (?, ?, ?, ?)
           ON CONFLICT(user_id) DO UPDATE SET
             updated_at = excluded.updated_at
-        `).run(finalProfileId, req.user.id, now, now);
+        `, finalProfileId, req.user.id, now, now);
 
-        db.prepare(`
+        await db.run(`
           INSERT INTO pd_neuropathy_screenings (
             id, user_id, clinical_profile_id, model_key, input_type, file_name, file_path,
             csv_path, direction, fps_used, final_result, detected, tendency, probability,
             max_probability, positive_window_count, positive_window_ratio, reliability_level,
             reliability_reasons, clinical_note, raw_result_json, created_at
           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).run(
-          screeningId,
+        `, screeningId,
           req.user.id,
           finalProfileId,
           modelKey,
@@ -358,14 +357,11 @@ pdNeuropathyRouter.post(
           JSON.stringify(summary.reliabilityReasons || []),
           summary.clinicalNote,
           JSON.stringify(result),
-          now
-        );
+          now);
 
-        return db.prepare("SELECT * FROM pd_neuropathy_screenings WHERE id = ?").get(screeningId);
+        return db.get("SELECT * FROM pd_neuropathy_screenings WHERE id = ?", screeningId);
       });
-
-      const saved = save();
-      const allScreenings = latestScreenings(req.user.id);
+      const allScreenings = await latestScreenings(req.user.id);
 
       res.status(201).json({
         message: `${modelLabel(modelKey)} screening completed and saved.`,

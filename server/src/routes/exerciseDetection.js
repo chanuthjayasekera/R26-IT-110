@@ -140,13 +140,13 @@ function publicProfile(screenings = []) {
   };
 }
 
-function latestScreenings(userId) {
-  return db.prepare(`
+async function latestScreenings(userId) {
+  return db.all(`
     SELECT * FROM exercise_screenings
     WHERE user_id = ?
     ORDER BY created_at DESC
     LIMIT 60
-  `).all(userId);
+  `, userId);
 }
 
 function safeResolveStoredFile(storedPath) {
@@ -164,29 +164,29 @@ function safeUnlinkStoredFile(storedPath) {
   fs.promises.unlink(absolutePath).catch(() => {});
 }
 
-exerciseDetectionRouter.get("/clinical-profile", requireAuth, requireRole("patient"), (req, res) => {
-  const screenings = latestScreenings(req.user.id);
+exerciseDetectionRouter.get("/clinical-profile", requireAuth, requireRole("patient"), async (req, res) => {
+  const screenings = await latestScreenings(req.user.id);
   res.json({
     profile: publicProfile(screenings),
     screenings: screenings.map(publicScreening)
   });
 });
 
-exerciseDetectionRouter.get("/screenings/:id", requireAuth, requireRole("patient"), (req, res) => {
-  const screening = db.prepare(`
+exerciseDetectionRouter.get("/screenings/:id", requireAuth, requireRole("patient"), async (req, res) => {
+  const screening = await db.get(`
     SELECT * FROM exercise_screenings
     WHERE id = ? AND user_id = ?
-  `).get(req.params.id, req.user.id);
+  `, req.params.id, req.user.id);
 
   if (!screening) return res.status(404).json({ message: "Exercise screening record not found." });
   res.json({ screening: publicScreening(screening) });
 });
 
-function sendStoredVideo(req, res, column) {
-  const screening = db.prepare(`
+async function sendStoredVideo(req, res, column) {
+  const screening = await db.get(`
     SELECT * FROM exercise_screenings
     WHERE id = ? AND user_id = ?
-  `).get(req.params.id, req.user.id);
+  `, req.params.id, req.user.id);
 
   if (!screening) return res.status(404).json({ message: "Exercise video not found." });
   const absolutePath = safeResolveStoredFile(screening[column]);
@@ -199,32 +199,32 @@ function sendStoredVideo(req, res, column) {
   res.sendFile(absolutePath);
 }
 
-exerciseDetectionRouter.get("/screenings/:id/file", requireAuth, requireRole("patient"), (req, res) => {
-  sendStoredVideo(req, res, "file_path");
+exerciseDetectionRouter.get("/screenings/:id/file", requireAuth, requireRole("patient"), async (req, res) => {
+  await sendStoredVideo(req, res, "file_path");
 });
 
-exerciseDetectionRouter.get("/screenings/:id/annotated", requireAuth, requireRole("patient"), (req, res) => {
-  sendStoredVideo(req, res, "annotated_path");
+exerciseDetectionRouter.get("/screenings/:id/annotated", requireAuth, requireRole("patient"), async (req, res) => {
+  await sendStoredVideo(req, res, "annotated_path");
 });
 
-function deleteScreeningRecord(req, res) {
-  const screening = db.prepare(`
+async function deleteScreeningRecord(req, res) {
+  const screening = await db.get(`
     SELECT * FROM exercise_screenings
     WHERE id = ? AND user_id = ?
-  `).get(req.params.id, req.user.id);
+  `, req.params.id, req.user.id);
 
   if (!screening) return res.status(404).json({ message: "Exercise screening record not found." });
 
   const now = new Date().toISOString();
-  db.transaction(() => {
-    db.prepare("DELETE FROM exercise_screenings WHERE id = ? AND user_id = ?").run(req.params.id, req.user.id);
-    db.prepare("UPDATE clinical_profiles SET updated_at = ? WHERE user_id = ?").run(now, req.user.id);
-  })();
+  await db.transaction(async () => {
+    await db.run("DELETE FROM exercise_screenings WHERE id = ? AND user_id = ?", req.params.id, req.user.id);
+    await db.run("UPDATE clinical_profiles SET updated_at = ? WHERE user_id = ?", now, req.user.id);
+  });
 
   safeUnlinkStoredFile(screening.file_path);
   safeUnlinkStoredFile(screening.annotated_path);
 
-  const remaining = latestScreenings(req.user.id);
+  const remaining = await latestScreenings(req.user.id);
   res.json({
     message: "Exercise screening record deleted.",
     profile: publicProfile(remaining),
@@ -235,28 +235,28 @@ function deleteScreeningRecord(req, res) {
 exerciseDetectionRouter.delete("/screenings/:id", requireAuth, requireRole("patient"), deleteScreeningRecord);
 exerciseDetectionRouter.post("/screenings/:id/delete", requireAuth, requireRole("patient"), deleteScreeningRecord);
 
-function clearScreeningRecords(req, res) {
+async function clearScreeningRecords(req, res) {
   const exerciseKey = req.query.exercise ? normalizeExerciseKey(req.query.exercise) : null;
   const screenings = exerciseKey
-    ? db.prepare("SELECT * FROM exercise_screenings WHERE user_id = ? AND exercise_key = ?").all(req.user.id, exerciseKey)
-    : db.prepare("SELECT * FROM exercise_screenings WHERE user_id = ?").all(req.user.id);
+    ? await db.all("SELECT * FROM exercise_screenings WHERE user_id = ? AND exercise_key = ?", req.user.id, exerciseKey)
+    : await db.all("SELECT * FROM exercise_screenings WHERE user_id = ?", req.user.id);
 
   const now = new Date().toISOString();
-  db.transaction(() => {
+  await db.transaction(async () => {
     if (exerciseKey) {
-      db.prepare("DELETE FROM exercise_screenings WHERE user_id = ? AND exercise_key = ?").run(req.user.id, exerciseKey);
+      await db.run("DELETE FROM exercise_screenings WHERE user_id = ? AND exercise_key = ?", req.user.id, exerciseKey);
     } else {
-      db.prepare("DELETE FROM exercise_screenings WHERE user_id = ?").run(req.user.id);
+      await db.run("DELETE FROM exercise_screenings WHERE user_id = ?", req.user.id);
     }
-    db.prepare("UPDATE clinical_profiles SET updated_at = ? WHERE user_id = ?").run(now, req.user.id);
-  })();
+    await db.run("UPDATE clinical_profiles SET updated_at = ? WHERE user_id = ?", now, req.user.id);
+  });
 
   screenings.forEach((screening) => {
     safeUnlinkStoredFile(screening.file_path);
     safeUnlinkStoredFile(screening.annotated_path);
   });
 
-  const remaining = latestScreenings(req.user.id);
+  const remaining = await latestScreenings(req.user.id);
   res.json({
     message: "Exercise screening records cleared.",
     profile: publicProfile(remaining),
@@ -287,19 +287,19 @@ exerciseDetectionRouter.post(
       const profileId = createId("clin");
       const screeningId = createId("exs");
 
-      const save = db.transaction(() => {
-        const existingProfile = db.prepare("SELECT id FROM clinical_profiles WHERE user_id = ?").get(req.user.id);
+      const saved = await db.transaction(async () => {
+        const existingProfile = await db.get("SELECT id FROM clinical_profiles WHERE user_id = ?", req.user.id);
         const finalProfileId = existingProfile?.id || profileId;
 
-        db.prepare(`
+        await db.run(`
           INSERT INTO clinical_profiles (
             id, user_id, created_at, updated_at
           ) VALUES (?, ?, ?, ?)
           ON CONFLICT(user_id) DO UPDATE SET
             updated_at = excluded.updated_at
-        `).run(finalProfileId, req.user.id, now, now);
+        `, finalProfileId, req.user.id, now, now);
 
-        db.prepare(`
+        await db.run(`
           INSERT INTO exercise_screenings (
             id, user_id, clinical_profile_id, exercise_key, exercise_label, file_name,
             file_path, annotated_path, final_prediction, final_label, quality_score,
@@ -307,8 +307,7 @@ exerciseDetectionRouter.post(
             num_windows, valid_pose_frames, reliability_level, reliability_reasons,
             window_report_json, raw_result_json, created_at
           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).run(
-          screeningId,
+        `, screeningId,
           req.user.id,
           finalProfileId,
           exerciseKey,
@@ -329,14 +328,11 @@ exerciseDetectionRouter.post(
           JSON.stringify(result.reliability_notes || []),
           JSON.stringify(result.window_report || {}),
           JSON.stringify(result),
-          now
-        );
+          now);
 
-        return db.prepare("SELECT * FROM exercise_screenings WHERE id = ?").get(screeningId);
+        return db.get("SELECT * FROM exercise_screenings WHERE id = ?", screeningId);
       });
-
-      const saved = save();
-      const allScreenings = latestScreenings(req.user.id);
+      const allScreenings = await latestScreenings(req.user.id);
 
       res.status(201).json({
         message: `${exerciseLabels[exerciseKey]} screening completed and saved.`,

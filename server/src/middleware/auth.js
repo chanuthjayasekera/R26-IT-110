@@ -2,12 +2,12 @@ import { config } from "../config.js";
 import { db } from "../db.js";
 import { verifySession } from "../utils/security.js";
 
-export function requireAuth(req, res, next) {
+export async function requireAuth(req, res, next) {
   try {
     const token = req.cookies[config.cookieName];
     if (!token) return res.status(401).json({ message: "Please login to continue." });
     const payload = verifySession(token);
-    const user = db.prepare("SELECT * FROM users WHERE id = ?").get(payload.sub);
+    const user = await db.get("SELECT * FROM users WHERE id = ?", payload.sub);
     if (!user) return res.status(401).json({ message: "Session user was not found." });
     req.user = user;
     next();

@@ -19,6 +19,7 @@ export const config = {
   nodeEnv: process.env.NODE_ENV || "development",
   cookieName: "gait_session",
   pythonPath: process.env.PYTHON_PATH || process.env.PYTHON || (process.platform === "win32" ? "python" : "python3"),
+  databaseUrl: process.env.DATABASE_URL || "",
   smtp: {
     host: process.env.SMTP_HOST || "",
     port: Number(process.env.SMTP_PORT || 587),
