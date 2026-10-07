@@ -2,3 +2,5 @@
 Normal-Abnormal,ExtraTrees,924,"Video-level, subject/video-grouped",0.961,0.980,0.973,0.977
 SCA,HistGradientBoosting,1065,"Subject-wise holdout, video-level",1.000,1.000,1.000,1.000
 KOA,HistGradientBoosting,271,"Untouched subject-holdout, video-level",0.982,1.000,0.875,0.933
+Parkinsonian,HistGradientBoosting,1028,"Locked-test, video-level",0.961,0.760,0.950,0.844
+Neuropathic,ExtraTrees,162,"Untouched subject-holdout, video-level",0.972,0.895,0.850,0.872
