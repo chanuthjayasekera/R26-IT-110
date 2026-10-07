@@ -1,4 +1,5 @@
 import express from "express";
+import "./utils/expressAsyncErrors.js";
 import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
@@ -13,7 +14,14 @@ import { pdNeuropathyRouter } from "./routes/pdNeuropathy.js";
 import { exerciseDetectionRouter } from "./routes/exerciseDetection.js";
 import { centralProfileRouter } from "./routes/centralProfile.js";
 
-await migrate();
+try {
+  await migrate();
+} catch (error) {
+  console.error("[startup] Could not start the API because PostgreSQL is unavailable.");
+  console.error(`[startup] ${error?.message || String(error)}`);
+  console.error("[startup] Check DATABASE_URL, internet access, firewall/VPN settings, and Neon database status.");
+  process.exit(1);
+}
 
 const app = express();
 const allowedOrigins = new Set(config.clientOrigins);
@@ -60,6 +68,10 @@ app.use((req, res) => res.status(404).json({ message: "Route not found." }));
 
 app.use((err, req, res, next) => {
   console.error(err);
+  if (err?.isTransientDatabaseError) {
+    return res.status(503).json({ message: "Database is temporarily unavailable. Please try again." });
+  }
+
   res.status(500).json({ message: "Unexpected server error." });
 });
 

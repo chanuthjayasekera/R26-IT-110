@@ -9,17 +9,146 @@ if (!config.databaseUrl) {
   throw new Error("DATABASE_URL is required. Add your PostgreSQL connection string to server/.env.");
 }
 
-const usesSsl = /sslmode=require/i.test(config.databaseUrl) || /\.neon\.tech/i.test(config.databaseUrl);
+const TRANSIENT_DATABASE_CODES = new Set([
+  "08000",
+  "08001",
+  "08003",
+  "08006",
+  "57P01",
+  "57P02",
+  "57P03",
+  "ECONNRESET",
+  "ECONNREFUSED",
+  "ETIMEDOUT",
+  "ENOTFOUND",
+  "EAI_AGAIN"
+]);
+
+function normalizeDatabaseUrl(databaseUrl) {
+  try {
+    const url = new URL(databaseUrl);
+    const sslMode = url.searchParams.get("sslmode")?.toLowerCase();
+
+    if (["prefer", "require", "verify-ca"].includes(sslMode)) {
+      url.searchParams.set("sslmode", "verify-full");
+    } else if (!sslMode && /\.neon\.tech$/i.test(url.hostname)) {
+      url.searchParams.set("sslmode", "verify-full");
+    }
+
+    return {
+      connectionString: url.toString(),
+      host: url.hostname,
+      database: decodeURIComponent(url.pathname.replace(/^\/+/, "")) || "unknown"
+    };
+  } catch {
+    return {
+      connectionString: databaseUrl,
+      host: "unknown-host",
+      database: "unknown-database"
+    };
+  }
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+function formatDatabaseError(error) {
+  const code = error?.code ? ` code=${error.code}` : "";
+  return `${error?.message || String(error)}${code}`;
+}
+
+function isTransientDatabaseError(error) {
+  const message = String(error?.message || "").toLowerCase();
+  return TRANSIENT_DATABASE_CODES.has(error?.code)
+    || message.includes("connection terminated")
+    || message.includes("network socket disconnected")
+    || message.includes("server closed the connection")
+    || message.includes("timeout")
+    || message.includes("terminating connection");
+}
+
+function markTransientDatabaseError(error) {
+  if (error && typeof error === "object" && isTransientDatabaseError(error)) {
+    error.isTransientDatabaseError = true;
+  }
+  return error;
+}
+
+async function withDatabaseStartupRetry(callback, label) {
+  let lastError;
+
+  for (let attempt = 1; attempt <= config.database.startupRetries; attempt += 1) {
+    try {
+      return await callback();
+    } catch (error) {
+      lastError = error;
+      const canRetry = attempt < config.database.startupRetries && isTransientDatabaseError(error);
+
+      if (!canRetry) {
+        throw markTransientDatabaseError(error);
+      }
+
+      const delay = config.database.startupRetryDelayMs * attempt;
+      console.warn(`[db] ${label} failed (${formatDatabaseError(error)}). Retrying in ${delay}ms (${attempt}/${config.database.startupRetries})...`);
+      await sleep(delay);
+    }
+  }
+
+  throw lastError;
+}
+
+async function withDatabaseQueryRetry(callback, label) {
+  const activeTransactionClient = transactionStore.getStore();
+
+  if (activeTransactionClient) {
+    return callback(activeTransactionClient);
+  }
+
+  let lastError;
+
+  for (let attempt = 0; attempt <= config.database.queryRetries; attempt += 1) {
+    try {
+      return await callback(pool);
+    } catch (error) {
+      lastError = error;
+      const canRetry = attempt < config.database.queryRetries && isTransientDatabaseError(error);
+
+      if (!canRetry) {
+        throw markTransientDatabaseError(error);
+      }
+
+      const delay = config.database.queryRetryDelayMs * (attempt + 1);
+      console.warn(`[db] ${label} failed (${formatDatabaseError(error)}). Retrying in ${delay}ms...`);
+      await sleep(delay);
+    }
+  }
+
+  throw lastError;
+}
+
+const databaseTarget = normalizeDatabaseUrl(config.databaseUrl);
 const pool = new Pool({
-  connectionString: config.databaseUrl,
-  ssl: usesSsl ? { rejectUnauthorized: false } : undefined
+  connectionString: databaseTarget.connectionString,
+  connectionTimeoutMillis: config.database.connectionTimeoutMs,
+  idleTimeoutMillis: config.database.idleTimeoutMs,
+  max: config.database.poolMax,
+  keepAlive: true
+});
+
+pool.on("connect", (client) => {
+  client.on("error", (error) => {
+    console.error(`[db] PostgreSQL client connection error: ${formatDatabaseError(error)}`);
+  });
+});
+
+pool.on("error", (error) => {
+  console.error(`[db] Idle PostgreSQL client error: ${formatDatabaseError(error)}`);
 });
 
 const transactionStore = new AsyncLocalStorage();
-
-function activeClient() {
-  return transactionStore.getStore() || pool;
-}
 
 function toPostgresSql(sql) {
   let parameterIndex = 0;
@@ -28,12 +157,12 @@ function toPostgresSql(sql) {
 
 async function query(sql, params = []) {
   const values = Array.isArray(params) ? params : [params];
-  return activeClient().query(toPostgresSql(sql), values);
+  return withDatabaseQueryRetry((client) => client.query(toPostgresSql(sql), values), "Database query");
 }
 
 export const db = {
   async exec(sql) {
-    return activeClient().query(sql);
+    return withDatabaseQueryRetry((client) => client.query(sql), "Database command");
   },
 
   async get(sql, ...params) {
@@ -53,16 +182,23 @@ export const db = {
 
   async transaction(callback) {
     const client = await pool.connect();
+    let failedError;
+
     try {
       await client.query("BEGIN");
       const result = await transactionStore.run(client, callback);
       await client.query("COMMIT");
       return result;
     } catch (error) {
-      await client.query("ROLLBACK");
+      failedError = error;
+      try {
+        await client.query("ROLLBACK");
+      } catch (rollbackError) {
+        console.error(`[db] Failed to rollback transaction: ${formatDatabaseError(rollbackError)}`);
+      }
       throw error;
     } finally {
-      client.release();
+      client.release(failedError);
     }
   }
 };
@@ -71,7 +207,7 @@ async function addColumn(table, column, definition) {
   await db.exec(`ALTER TABLE ${table} ADD COLUMN IF NOT EXISTS ${column} ${definition}`);
 }
 
-export async function migrate() {
+async function runMigrations() {
   await db.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
@@ -321,4 +457,11 @@ export async function migrate() {
       ) VALUES (?, 'admin', 'System Admin', ?, ?, ?, 1, 'approved', ?, ?)
     `, createId("adm"), adminEmail, passwordHash, "+0000000000", now, now);
   }
+}
+
+export async function migrate() {
+  const startedAt = Date.now();
+  console.log(`[db] Connecting to PostgreSQL at ${databaseTarget.host}/${databaseTarget.database}...`);
+  await withDatabaseStartupRetry(() => db.transaction(runMigrations), "Database migration");
+  console.log(`[db] Database ready in ${Date.now() - startedAt}ms.`);
 }

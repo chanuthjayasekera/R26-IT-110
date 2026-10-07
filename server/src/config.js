@@ -9,6 +9,11 @@ function parseClientOrigins(value) {
     .filter(Boolean);
 }
 
+function parsePositiveInteger(value, fallback) {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+}
+
 const clientOrigins = parseClientOrigins(process.env.CLIENT_ORIGIN);
 
 export const config = {
@@ -20,6 +25,15 @@ export const config = {
   cookieName: "gait_session",
   pythonPath: process.env.PYTHON_PATH || process.env.PYTHON || (process.platform === "win32" ? "python" : "python3"),
   databaseUrl: process.env.DATABASE_URL || "",
+  database: {
+    connectionTimeoutMs: parsePositiveInteger(process.env.DB_CONNECTION_TIMEOUT_MS, 45000),
+    idleTimeoutMs: parsePositiveInteger(process.env.DB_IDLE_TIMEOUT_MS, 30000),
+    poolMax: parsePositiveInteger(process.env.DB_POOL_MAX, 5),
+    queryRetries: parsePositiveInteger(process.env.DB_QUERY_RETRIES, 2),
+    queryRetryDelayMs: parsePositiveInteger(process.env.DB_QUERY_RETRY_DELAY_MS, 500),
+    startupRetries: parsePositiveInteger(process.env.DB_STARTUP_RETRIES, 6),
+    startupRetryDelayMs: parsePositiveInteger(process.env.DB_STARTUP_RETRY_DELAY_MS, 2000)
+  },
   smtp: {
     host: process.env.SMTP_HOST || "",
     port: Number(process.env.SMTP_PORT || 587),
