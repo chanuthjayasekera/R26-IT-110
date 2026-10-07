@@ -1,0 +1,2 @@
+﻿Task,Classifier,Feat,Evaluation Protocol,Acc,Prec,Rec,F1
+Normal-Abnormal,ExtraTrees,924,"Video-level, subject/video-grouped",0.961,0.980,0.973,0.977
