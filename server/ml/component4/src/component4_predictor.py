@@ -33,6 +33,12 @@ from mediapipe.tasks.python import vision
 DEPLOYMENT_THRESHOLD = 0.48
 DEFAULT_EXERCISE_NAME = "Kinect Gesture 3 - Chair - Left Arm Forward Raise"
 
+LEFT_ARM_PLANE_GUARD_EXERCISES = {"gesture3", "gesture5"}
+PLANE_GUARD_MIN_CONFIDENCE = 0.62
+PLANE_GUARD_LATERAL_ROM_MIN = 0.75
+PLANE_GUARD_LATERAL_PEAK_MIN = 0.95
+PLANE_GUARD_LATERAL_SCORE_MIN = 0.52
+
 
 # --------------------------------------------------
 # Kinect-style joint order used by the final hybrid model
@@ -180,6 +186,112 @@ def jerk_signal(points: np.ndarray) -> np.ndarray:
     jerk = np.diff(acceleration, axis=0)
 
     return np.linalg.norm(jerk, axis=1)
+
+
+def percentile_range(values: np.ndarray, low: float = 5.0, high: float = 95.0) -> float:
+    values = np.asarray(values, dtype=float)
+    values = values[np.isfinite(values)]
+    if values.size == 0:
+        return 0.0
+    return float(np.nanpercentile(values, high) - np.nanpercentile(values, low))
+
+
+def movement_plane_guard(
+    pose_frames: List[Dict[str, np.ndarray]],
+    expected_exercise_key: Optional[str],
+) -> Dict:
+    """
+    Deployment guard for the two left-arm raises.
+
+    The binary quality models can score a clean left-arm raise as correct even
+    when the selected exercise is the other left-arm raise.  This guard only
+    overrides clear movement-plane conflicts and stays passive when MediaPipe
+    depth/lateral evidence is ambiguous.
+    """
+    guard = {
+        "enabled": expected_exercise_key in LEFT_ARM_PLANE_GUARD_EXERCISES,
+        "expected_exercise_key": expected_exercise_key,
+        "expected_plane": None,
+        "detected_plane": "not_applicable",
+        "confidence": 0.0,
+        "applied": False,
+        "reason": "",
+        "metrics": {},
+    }
+
+    if not guard["enabled"]:
+        guard["reason"] = "Movement-plane guard is only used for left forward and left lateral raises."
+        return guard
+
+    if len(pose_frames) < 12:
+        guard["detected_plane"] = "uncertain"
+        guard["reason"] = "Not enough valid pose frames for movement-plane checking."
+        return guard
+
+    expected_plane = "forward" if expected_exercise_key == "gesture3" else "lateral"
+    guard["expected_plane"] = expected_plane
+
+    shoulder = np.asarray([frame["ShoulderLeft"] for frame in pose_frames], dtype=float)
+    wrist = np.asarray([frame["WristLeft"] for frame in pose_frames], dtype=float)
+    hand = np.asarray([frame["HandLeft"] for frame in pose_frames], dtype=float)
+    hand_center = (wrist + hand) / 2.0
+    rel = hand_center - shoulder
+
+    lateral_abs = np.abs(rel[:, 0])
+    depth_abs = np.abs(rel[:, 2])
+    lateral_rom = percentile_range(lateral_abs)
+    depth_rom = percentile_range(rel[:, 2])
+    lateral_peak = float(np.nanpercentile(lateral_abs, 90))
+    depth_peak = float(np.nanpercentile(depth_abs, 90))
+    lateral_strength = lateral_rom + 0.35 * lateral_peak
+    depth_strength = depth_rom + 0.35 * depth_peak
+
+    total_strength = lateral_strength + depth_strength + 1e-8
+    lateral_score = lateral_strength / total_strength
+    depth_score = depth_strength / total_strength
+    confidence = max(lateral_score, depth_score)
+
+    metrics = {
+        "lateral_rom": round(lateral_rom, 4),
+        "depth_rom": round(depth_rom, 4),
+        "lateral_peak": round(lateral_peak, 4),
+        "depth_peak": round(depth_peak, 4),
+        "lateral_strength": round(lateral_strength, 4),
+        "depth_strength": round(depth_strength, 4),
+        "lateral_score": round(lateral_score, 4),
+        "depth_score": round(depth_score, 4),
+    }
+    guard["metrics"] = metrics
+    guard["confidence"] = round(confidence, 4)
+
+    clear_lateral_excursion = (
+        lateral_score >= PLANE_GUARD_LATERAL_SCORE_MIN
+        and lateral_rom >= PLANE_GUARD_LATERAL_ROM_MIN
+        and lateral_peak >= PLANE_GUARD_LATERAL_PEAK_MIN
+    )
+
+    if clear_lateral_excursion:
+        detected_plane = "lateral"
+        guard["confidence"] = round(max(confidence, 0.75), 4)
+        guard["metrics"]["clear_lateral_excursion"] = True
+    elif confidence < PLANE_GUARD_MIN_CONFIDENCE:
+        guard["detected_plane"] = "uncertain"
+        guard["metrics"]["clear_lateral_excursion"] = False
+        guard["reason"] = "Forward-vs-lateral movement-plane evidence is ambiguous."
+        return guard
+    else:
+        detected_plane = "lateral" if lateral_score > depth_score else "forward"
+        guard["metrics"]["clear_lateral_excursion"] = False
+
+    guard["detected_plane"] = detected_plane
+
+    if detected_plane != expected_plane:
+        guard["applied"] = True
+        guard["reason"] = f"Detected a clear {detected_plane} raise while {expected_plane} raise was selected."
+    else:
+        guard["reason"] = f"Detected movement plane matches the selected {expected_plane} raise."
+
+    return guard
 
 
 # --------------------------------------------------
@@ -609,6 +721,7 @@ def predict_video(
     model_path: str,
     pose_task_model: str,
     save_annotated: Optional[str] = None,
+    expected_exercise_key: Optional[str] = None,
 ) -> Dict:
 
     bundle = load_model_bundle(model_path)
@@ -689,6 +802,20 @@ def predict_video(
 
     final_label = 1 if mean_correct_probability >= decision_threshold else 0
     final_text = "Correct" if final_label == 1 else "Incorrect"
+    model_suggested_label = int(final_label)
+    model_suggested_prediction = final_text
+    model_suggested_mean_correct_probability = float(mean_correct_probability)
+    model_suggested_window_predictions = calibrated_window_preds.copy()
+
+    plane_guard = movement_plane_guard(pose_frames, expected_exercise_key)
+    if final_label == 1 and plane_guard.get("applied"):
+        final_label = 0
+        final_text = "Incorrect - wrong exercise selected"
+        mean_correct_probability = min(
+            float(mean_correct_probability),
+            max(0.0, decision_threshold - 0.001),
+        )
+        calibrated_window_preds = np.zeros_like(calibrated_window_preds, dtype=int)
 
     reliability = "High"
     reliability_notes = ["Enough valid pose frames were extracted for exercise-quality screening."]
@@ -706,14 +833,23 @@ def predict_video(
         ]
 
     probability_margin = abs(mean_correct_probability - decision_threshold)
-    if probability_margin < 0.03:
+    if probability_margin < 0.03 and not plane_guard.get("applied"):
         reliability = "Low"
         reliability_notes = [
             f"The score is only {probability_margin:.3f} from the decision threshold. "
             "Treat this result as uncertain and repeat the recording."
         ]
 
+    if plane_guard.get("applied"):
+        reliability = "High"
+        reliability_notes = [
+            plane_guard.get("reason")
+            or "The selected exercise did not match the detected movement plane."
+        ]
+
     quality_score = float(np.clip(mean_correct_probability * 100.0, 0.0, 100.0))
+    correct_ratio = float(np.mean(calibrated_window_preds == 1))
+    incorrect_ratio = float(np.mean(calibrated_window_preds == 0))
 
     return {
         "video_path": str(video_path),
@@ -731,12 +867,16 @@ def predict_video(
         "extra_raw_features": len(extra_features),
 
         "window_predictions": calibrated_window_preds.tolist(),
+        "model_suggested_window_predictions": model_suggested_window_predictions.tolist(),
         "raw_model_window_predictions": raw_model_window_preds.tolist(),
         "window_correct_probabilities": [float(x) for x in correct_probs],
 
         "correct_ratio": round(correct_ratio, 4),
         "incorrect_ratio": round(incorrect_ratio, 4),
         "mean_correct_probability": round(mean_correct_probability, 4),
+        "model_suggested_label": model_suggested_label,
+        "model_suggested_prediction": model_suggested_prediction,
+        "model_suggested_mean_correct_probability": round(model_suggested_mean_correct_probability, 4),
         "quality_score": round(quality_score, 2),
         "probability_margin": round(probability_margin, 4),
 
@@ -748,6 +888,7 @@ def predict_video(
 
         "final_label": int(final_label),
         "final_prediction": final_text,
+        "movement_plane_guard": plane_guard,
 
         "reliability": reliability,
         "reliability_notes": reliability_notes,

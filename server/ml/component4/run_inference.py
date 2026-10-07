@@ -140,6 +140,7 @@ def main() -> None:
             model_path=str(model_path),
             pose_task_model=str(POSE_MODEL_PATH),
             save_annotated=str(annotated_path) if annotated_path else None,
+            expected_exercise_key=args.exercise,
         )
         source_fps = video_fps(str(video_path))
         window_report = build_window_report(result, model_info, source_fps)
